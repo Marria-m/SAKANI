@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Sakani.BLL/Sakani.BLL.csproj" />
+  <Project Path="Sakani.DAL/Sakani.DAL.csproj" />
+  <Project Path="Sakani.Domain/Sakani.Domain.csproj" />
+  <Project Path="Sakani.Web/Sakani.Web.csproj" />
+</Solution>
