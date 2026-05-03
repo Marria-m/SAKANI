@@ -2,5 +2,5 @@
   <Project Path="Sakani.BLL/Sakani.BLL.csproj" />
   <Project Path="Sakani.DAL/Sakani.DAL.csproj" />
   <Project Path="Sakani.Domain/Sakani.Domain.csproj" />
-  <Project Path="Sakani.Web/Sakani.Web.csproj" />
+  <Project Path="SAKANI/SAKANI.csproj" Id="f96b4787-fc6f-4ebe-bd6c-f75f2f8bdbd3" />
 </Solution>

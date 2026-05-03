@@ -1,0 +1,6 @@
+@SAKANI_HostAddress = http://localhost:5125
+
+GET {{SAKANI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
