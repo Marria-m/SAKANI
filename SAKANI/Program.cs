@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Sakani.DAL; 
+using Sakani.DAL.Data.Context;
 namespace SAKANI
 {
     public class Program
@@ -7,6 +10,8 @@ namespace SAKANI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddDataAccessLayer(builder.Configuration);
+            //builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllers();
 

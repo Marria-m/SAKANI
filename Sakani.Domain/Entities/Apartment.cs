@@ -26,7 +26,7 @@ namespace Sakani.Domain.Entities
         // Navigation Properties
         public int? WishListApartmentId { get; set; }
         public WishListApartment WishListApartment { get; set; }
-        public string OwnerId { get; set; }
+        public int OwnerId { get; set; }
         public Owner Owner { get; set; }
         public ICollection<ApartmentMedia> Media { get; set; } 
         public ICollection<Amenities> Amenities { get; set; } 

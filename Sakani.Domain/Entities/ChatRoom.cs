@@ -11,9 +11,9 @@ namespace Sakani.Domain.Entities
         public Message LastMassage { get; set; }
 
         // Navigation Properties
-        public string TenantId { get; set; }
+        public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
-        public string OwnerId { get; set; }
+        public int OwnerId { get; set; }
         public Owner Owner { get; set; }
         public ICollection<Message> Messages { get; set; }
     }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sakani.Domain.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser<int>
     {
 
         #region basic attributes

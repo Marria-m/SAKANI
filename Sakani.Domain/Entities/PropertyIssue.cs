@@ -18,7 +18,7 @@ namespace Sakani.Domain.Entities
         public bool IsSeen { get; set; }
 
         // Navigation Properties
-        public string TenantId { get; set; }
+        public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
         public ICollection<IssueMedia> Media { get; set; } 
     }

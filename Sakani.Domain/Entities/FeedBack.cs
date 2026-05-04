@@ -11,7 +11,7 @@ namespace Sakani.Domain.Entities
         public double Rating { get; set; }
 
         // Navigation Properties
-        public string UserId { get; set; }
+        public int UserId { get; set; }
         public ApplicationUser User { get; set; }
         public ICollection<Comment> Comments { get; set; } 
     }

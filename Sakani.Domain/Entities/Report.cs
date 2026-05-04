@@ -13,9 +13,9 @@ namespace Sakani.Domain.Entities
         public ReportStatus Status { get; set; } 
 
         // Navigation Properties
-        public string UserId { get; set; }
+        public int UserId { get; set; }
         public ApplicationUser User { get; set; }
-        public string AdminId { get; set; }
+        public int AdminId { get; set; }
         public Admin Admin { get; set; }
     }
 }

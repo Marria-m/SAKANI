@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sakani.Domain.Entities
 {
-    internal class ApartmentMedia : BaseEntity
+    public class ApartmentMedia : BaseEntity
     {
         public string MediaUrl { get; set; }
 

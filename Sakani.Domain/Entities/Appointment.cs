@@ -15,7 +15,7 @@ namespace Sakani.Domain.Entities
         public DateOnly ApplyedAt { get; set; }
 
         // Navigation Properties
-        public string TenantId { get; set; }
+        public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
         public Booking Booking { get; set; }
     }
