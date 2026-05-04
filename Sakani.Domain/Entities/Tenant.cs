@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sakani.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace Sakani.Domain.Entities
         public string? UniversityYear { get; set; }
         public string Bio { get; set; }
         public double Budget { get; set; } 
+        public Gender Gender { get; set; }
+        public TenantRoles Roles { get; set; }
         #endregion
     }
 }

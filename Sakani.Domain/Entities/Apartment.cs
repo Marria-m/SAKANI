@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sakani.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,8 @@ namespace Sakani.Domain.Entities
         public int NoOfRooms { get; set; }
         public string City { get; set; }
         public bool IsBarginAllowed { get; set; } 
+        public AppartmentStatus Status { get; set; }
+        public GenderPolices GenderPolices { get; set; }
         #endregion
 
     }
