@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +14,8 @@ namespace Sakani.Domain.Entities
 
         public BookingStatus Status { get; set; }
 
+        // Navigation Properties
+        public int AppointmentId { get; set; }
+        public Appointment Appointment { get; set; }
     }
 }

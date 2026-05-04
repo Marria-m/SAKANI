@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,5 +26,9 @@ namespace Sakani.Domain.Entities
         public bool IsDeleted { get; set; } = false;
 
         #endregion
+
+        // Navigation Properties
+        public ICollection<FeedBack> Feedbacks { get; set; } 
+        public ICollection<Report> Reports { get; set; } 
     }
 }

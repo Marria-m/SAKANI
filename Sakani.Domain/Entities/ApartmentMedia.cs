@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +12,9 @@ namespace Sakani.Domain.Entities
         public string MediaUrl { get; set; }
 
         public MediaType MediaType { get; set; }
+
+        // Navigation Properties
+        public int ApartmentId { get; set; }
+        public Apartment Apartment { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +12,9 @@ namespace Sakani.Domain.Entities
         public string CommentContent { get; set; }
         public DateTime SubmittedAt { get; set; }
         public Role UserRole { get; set; }
+
+        // Navigation Properties
+        public int FeedBackId { get; set; }
+        public FeedBack FeedBack { get; set; }
     }
 }

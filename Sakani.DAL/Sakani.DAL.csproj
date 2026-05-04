@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Sakani.Domain\Sakani.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Configuration\" />
+  </ItemGroup>
+
 </Project>

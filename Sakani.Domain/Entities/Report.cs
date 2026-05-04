@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +11,11 @@ namespace Sakani.Domain.Entities
     {
         public string Description { get; set; }
         public ReportStatus Status { get; set; } 
+
+        // Navigation Properties
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
+        public string AdminId { get; set; }
+        public Admin Admin { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Sakani.DAL.Context
+namespace Sakani.DAL.Data.Context
 {
     public class AppDbContext : DbContext
     {

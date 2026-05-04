@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +8,9 @@ namespace Sakani.Domain.Entities
 {
     public class WishListApartment : BaseEntity
     {
+        // Navigation Properties
+        public string TenantId { get; set; }
+        public Tenant Tenant { get; set; }
+        public ICollection<Apartment> Apartments { get; set; } 
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +11,8 @@ namespace Sakani.Domain.Entities
         public string Name { get; set; }
         public string IconUrl { get; set; }
 
+        // Navigation Properties
+        public int ApartmentId { get; set; }
+        public Apartment Apartment { get; set; }
     }
 }

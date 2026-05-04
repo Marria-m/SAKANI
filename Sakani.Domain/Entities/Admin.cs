@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +8,7 @@ namespace Sakani.Domain.Entities
 {
     public class Admin : ApplicationUser
     {
+        // Navigation Properties
+        public ICollection<Report> AdminReports { get; set; } 
     }
 }

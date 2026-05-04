@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +16,10 @@ namespace Sakani.Domain.Entities
         public IssuePriority Priority { get; set; }
         public DateTime ReportedAt { get; set; }
         public bool IsSeen { get; set; }
+
+        // Navigation Properties
+        public string TenantId { get; set; }
+        public Tenant Tenant { get; set; }
+        public ICollection<IssueMedia> Media { get; set; } 
     }
 }

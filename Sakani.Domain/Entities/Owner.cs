@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,10 @@ namespace Sakani.Domain.Entities
         public int TotalActiveProperties { get; set; }
         public double AvgRating { get; set; }
         public bool IsVerified { get; set; } 
+
+        // Navigation Properties
+        public ICollection<ChatRoom> ChatRooms { get; set; } 
+        public ICollection<Apartment> Apartments { get; set; }
         #endregion
     }
 }

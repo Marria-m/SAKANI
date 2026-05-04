@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,13 @@ namespace Sakani.Domain.Entities
         public double Budget { get; set; } 
         public Gender Gender { get; set; }
         public TenantRoles Roles { get; set; }
+
+        // Navigation Properties
+        public int? WishListApartmentId { get; set; }
+        public WishListApartment WishListApartment { get; set; }
+        public ICollection<PropertyIssue> PropertyIssues { get; set; } 
+        public ICollection<ChatRoom> ChatRooms { get; set; } 
+        public ICollection<Appointment> Appointments { get; set; } 
         #endregion
     }
 }
