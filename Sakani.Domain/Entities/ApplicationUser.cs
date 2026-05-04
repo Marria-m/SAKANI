@@ -30,5 +30,6 @@ namespace Sakani.Domain.Entities
         // Navigation Properties
         public ICollection<FeedBack> Feedbacks { get; set; } 
         public ICollection<Report> Reports { get; set; } 
+        public ICollection<UserNotification> UserNotifications { get; set; }
     }
 }

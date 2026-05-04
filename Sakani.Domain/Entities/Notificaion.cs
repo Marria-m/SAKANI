@@ -1,4 +1,4 @@
-﻿using Sakani.Domain.Enums;
+using Sakani.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +13,8 @@ namespace Sakani.Domain.Entities
         public string ImageUrl { get; set; }
         public bool IsRead { get; set; }
         public NotificationStatus Status { get; set; }
+
+        // Navigation Properties
+        public ICollection<UserNotification> UserNotifications { get; set; }
     }
 }
