@@ -1,0 +1,17 @@
+﻿using Sakani.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Sakani.Domain.Entities
+{
+    public class Appointment : BaseEntity
+    {
+        public DateOnly AppointmentDate { get; set; }
+        public AppointmentStatus AppointmentStatus { get; set; }
+        public string TenantMessage { get; set; }
+        public DateOnly ApplyedAt { get; set; }
+    }
+}
