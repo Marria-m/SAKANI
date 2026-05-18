@@ -59,5 +59,28 @@ namespace SAKANI.Controllers
                 });
             }
         }
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            try
+            {
+                var result = await _authService.RefreshTokenAsync(refreshToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("revoke-token")]
+        [Authorize]
+        public async Task<IActionResult> RevokeToken([FromBody] string refreshToken)
+        {
+            var success = await _authService.RevokeTokenAsync(refreshToken);
+            return success ? Ok("Token revoked.") : BadRequest("Invalid token.");
+        }
     }
 }

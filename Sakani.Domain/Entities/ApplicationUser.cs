@@ -29,5 +29,6 @@ namespace Sakani.Domain.Entities
         public List<FeedBack> Feedbacks { get; set; } 
         public List<Report> Reports { get; set; } 
         public List<UserNotification> UserNotifications { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
