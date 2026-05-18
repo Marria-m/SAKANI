@@ -14,17 +14,17 @@ namespace Sakani.Domain.Entities
         public string? Collage { get; set; }
         public string? Major { get; set; }
         public string? UniversityYear { get; set; }
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
         public double Budget { get; set; } 
         public Gender Gender { get; set; }
         public TenantRoles Roles { get; set; }
 
         // Navigation Properties
         public int? WishListApartmentId { get; set; }
-        public WishListApartment WishListApartment { get; set; }
-        public ICollection<PropertyIssue> PropertyIssues { get; set; } 
-        public ICollection<ChatRoom> ChatRooms { get; set; } 
-        public ICollection<Appointment> Appointments { get; set; } 
+        public WishListApartment? WishListApartment { get; set; }
+        public List<PropertyIssue> PropertyIssues { get; set; } 
+        public List<ChatRoom> ChatRooms { get; set; } 
+        public List<Appointment> Appointments { get; set; } 
         #endregion
     }
 }

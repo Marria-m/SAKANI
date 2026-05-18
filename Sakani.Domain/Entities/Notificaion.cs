@@ -15,6 +15,6 @@ namespace Sakani.Domain.Entities
         public NotificationStatus Status { get; set; }
 
         // Navigation Properties
-        public ICollection<UserNotification> UserNotifications { get; set; }
+        public List<UserNotification> UserNotifications { get; set; }
     }
 }

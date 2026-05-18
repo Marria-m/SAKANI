@@ -25,7 +25,6 @@ namespace Sakani.DAL.Data.Configuration.ActorsConfig
                 .HasMaxLength(20);
 
             builder.Property(t => t.Bio)
-                .IsRequired()
                 .HasMaxLength(500);
 
             builder.Property(t => t.Budget)

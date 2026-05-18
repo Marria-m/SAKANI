@@ -20,6 +20,6 @@ namespace Sakani.Domain.Entities
         // Navigation Properties
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
-        public ICollection<IssueMedia> Media { get; set; } 
+        public List<IssueMedia> Media { get; set; } 
     }
 }
