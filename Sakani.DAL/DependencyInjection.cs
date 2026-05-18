@@ -1,9 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sakani.DAL.Data.Context;
 using Sakani.DAL.Repositories;
+using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
+
+// to avoid collision between the UnitOfWork namespace and the UnitOfWork class
+using UoW = Sakani.DAL.UnitOfWork.UnitOfWork;
 
 namespace Sakani.DAL
 {
@@ -20,8 +25,8 @@ namespace Sakani.DAL
             // Repositories
             services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
-            // Unit of Work 
-            services.AddScoped<IUnitOfWork, Sakani.DAL.UnitOfWork.UnitOfWork>();
+            // Unit of Work
+            services.AddScoped<IUnitOfWork, UoW>();
 
             return services;
         }
