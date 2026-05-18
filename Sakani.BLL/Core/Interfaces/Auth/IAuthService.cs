@@ -12,7 +12,5 @@ namespace Sakani.BLL.Core.Interfaces.Auth
     {
         Task<UserDto> RegisterAsync(RegisterDto registerDto);
         Task<UserDto> LoginAsync(LoginDto loginDto);
-        Task<UserDto> RefreshTokenAsync(string refreshToken);
-        Task<bool>    RevokeTokenAsync(string refreshToken);
     }
 }

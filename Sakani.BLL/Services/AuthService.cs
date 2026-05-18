@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Sakani.BLL.Core.DTOs;
 using Sakani.BLL.Core.DTOs.AuthDTOs;
 using Sakani.BLL.Core.Helpers;
 using Sakani.BLL.Core.Interfaces.Auth;
-using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Enums;
 
@@ -14,19 +12,19 @@ namespace Sakani.BLL.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenHelper _jwtHelper;
-        private readonly AppDbContext _context;
+        private readonly ITokenService _tokenService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             JwtTokenHelper jwtHelper,
-            AppDbContext context)
+            ITokenService tokenService)
         {
-            _userManager = userManager;
-            _jwtHelper   = jwtHelper;
-            _context     = context;
+            _userManager  = userManager;
+            _jwtHelper    = jwtHelper;
+            _tokenService = tokenService;
         }
 
-        // ─── Register ──────────────────────────────────────────────────────────
+        // Register
         public async Task<UserDto> RegisterAsync(RegisterDto dto)
         {
             ApplicationUser user = dto.Role == Role.OWNER
@@ -50,16 +48,8 @@ namespace Sakani.BLL.Services
 
             await _userManager.AddToRoleAsync(user, dto.Role.ToString());
 
-            var roles        = await _userManager.GetRolesAsync(user);
-            var refreshToken = _jwtHelper.GenerateRefreshToken();
-
-            _context.RefreshTokens.Add(new RefreshToken
-            {
-                Token     = refreshToken,
-                ExpiresOn = DateTime.UtcNow.AddDays(7),
-                UserId    = user.Id
-            });
-            await _context.SaveChangesAsync();
+            var roles = await _userManager.GetRolesAsync(user);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {
@@ -71,7 +61,7 @@ namespace Sakani.BLL.Services
             };
         }
 
-        // ─── Login ─────────────────────────────────────────────────────────────
+        // Login
         public async Task<UserDto> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email)
@@ -80,74 +70,17 @@ namespace Sakani.BLL.Services
             if (!await _userManager.CheckPasswordAsync(user, dto.Password))
                 throw new Exception("Invalid email or password.");
 
-            var roles        = await _userManager.GetRolesAsync(user);
-            var refreshToken = _jwtHelper.GenerateRefreshToken();
-
-            _context.RefreshTokens.Add(new RefreshToken
-            {
-                Token     = refreshToken,
-                ExpiresOn = DateTime.UtcNow.AddDays(7),
-                UserId    = user.Id
-            });
-            await _context.SaveChangesAsync();
+            var roles = await _userManager.GetRolesAsync(user);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {
-                FullName     = user.FirstName,
+                FullName = user.FirstName + " " + user.LastName,
                 Email        = user.Email!,
                 Token        = _jwtHelper.GenerateAccessToken(user, roles),
                 RefreshToken = refreshToken,
                 ExpireOn     = DateTime.UtcNow.AddMinutes(60)
             };
-        }
-
-        // ─── Refresh Token ─────────────────────────────────────────────────────
-        public async Task<UserDto> RefreshTokenAsync(string refreshToken)
-        {
-            var tokenEntity = await _context.RefreshTokens
-                .Include(t => t.User)
-                .SingleOrDefaultAsync(t => t.Token == refreshToken);
-
-            if (tokenEntity is null || !tokenEntity.IsActive)
-                throw new Exception("Invalid or expired refresh token.");
-
-            // Rotate: revoke the old one
-            tokenEntity.RevokedOn = DateTime.UtcNow;
-
-            var roles           = await _userManager.GetRolesAsync(tokenEntity.User);
-            var newAccessToken  = _jwtHelper.GenerateAccessToken(tokenEntity.User, roles);
-            var newRefreshToken = _jwtHelper.GenerateRefreshToken();
-
-            _context.RefreshTokens.Add(new RefreshToken
-            {
-                Token     = newRefreshToken,
-                ExpiresOn = DateTime.UtcNow.AddDays(7),
-                UserId    = tokenEntity.UserId
-            });
-            await _context.SaveChangesAsync();
-
-            return new UserDto
-            {
-                FullName     = tokenEntity.User.FirstName,
-                Email        = tokenEntity.User.Email!,
-                Token        = newAccessToken,
-                RefreshToken = newRefreshToken,
-                ExpireOn     = DateTime.UtcNow.AddMinutes(60)
-            };
-        }
-
-        // ─── Revoke Token ──────────────────────────────────────────────────────
-        public async Task<bool> RevokeTokenAsync(string refreshToken)
-        {
-            var tokenEntity = await _context.RefreshTokens
-                .SingleOrDefaultAsync(t => t.Token == refreshToken);
-
-            if (tokenEntity is null || !tokenEntity.IsActive)
-                return false;
-
-            tokenEntity.RevokedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-            return true;
         }
     }
 }
