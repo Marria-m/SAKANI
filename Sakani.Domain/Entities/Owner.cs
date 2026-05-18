@@ -15,8 +15,8 @@ namespace Sakani.Domain.Entities
         public bool IsVerified { get; set; } 
 
         // Navigation Properties
-        public ICollection<ChatRoom> ChatRooms { get; set; } 
-        public ICollection<Apartment> Apartments { get; set; }
+        public List<ChatRoom> ChatRooms { get; set; } 
+        public List<Apartment> Apartments { get; set; }
         #endregion
     }
 }

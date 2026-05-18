@@ -13,6 +13,6 @@ namespace Sakani.Domain.Entities
         // Navigation Properties
         public int UserId { get; set; }
         public ApplicationUser User { get; set; }
-        public ICollection<Comment> Comments { get; set; } 
+        public List<Comment> Comments { get; set; } 
     }
 }
