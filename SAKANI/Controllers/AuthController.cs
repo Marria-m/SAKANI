@@ -9,11 +9,13 @@ namespace SAKANI.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IAuthService  _authService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
         {
-            _authService = authService;
+            _authService  = authService;
+            _refreshTokenService = refreshTokenService;
         }
 
         [HttpPost("register")]
@@ -58,6 +60,35 @@ namespace SAKANI.Controllers
                     innerException = ex.InnerException?.Message
                 });
             }
+        }
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _refreshTokenService.RefreshTokenAsync(dto.RefreshToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("revoke-token")]
+        [Authorize]
+        public async Task<IActionResult> RevokeToken([FromBody] TokenRequestDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var success = await _refreshTokenService.RevokeTokenAsync(dto.RefreshToken);
+            return success ? Ok("Token revoked.") : BadRequest("Invalid token.");
         }
     }
 }

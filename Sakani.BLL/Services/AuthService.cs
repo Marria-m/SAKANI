@@ -12,13 +12,19 @@ namespace Sakani.BLL.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenHelper _jwtHelper;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, JwtTokenHelper jwtHelper)
+        public AuthService(
+            UserManager<ApplicationUser> userManager,
+            JwtTokenHelper jwtHelper,
+            IRefreshTokenService refreshTokenService)
         {
-            _userManager = userManager;
-            _jwtHelper   = jwtHelper;
+            _userManager  = userManager;
+            _jwtHelper    = jwtHelper;
+            _refreshTokenService = refreshTokenService;
         }
 
+        // Register
         public async Task<UserDto> RegisterAsync(RegisterDto dto)
         {
             ApplicationUser user = dto.Role == Role.OWNER
@@ -43,16 +49,19 @@ namespace Sakani.BLL.Services
             await _userManager.AddToRoleAsync(user, dto.Role.ToString());
 
             var roles = await _userManager.GetRolesAsync(user);
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
+
             return new UserDto
             {
                 FullName     = user.FirstName,
                 Email        = user.Email!,
                 Token        = _jwtHelper.GenerateAccessToken(user, roles),
-                RefreshToken = _jwtHelper.GenerateRefreshToken(),
+                RefreshToken = refreshToken,
                 ExpireOn     = DateTime.UtcNow.AddMinutes(60)
             };
         }
 
+        // Login
         public async Task<UserDto> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email)
@@ -62,12 +71,14 @@ namespace Sakani.BLL.Services
                 throw new Exception("Invalid email or password.");
 
             var roles = await _userManager.GetRolesAsync(user);
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
+
             return new UserDto
             {
-                FullName     = user.FirstName,
+                FullName = user.FirstName + " " + user.LastName,
                 Email        = user.Email!,
                 Token        = _jwtHelper.GenerateAccessToken(user, roles),
-                RefreshToken = _jwtHelper.GenerateRefreshToken(),
+                RefreshToken = refreshToken,
                 ExpireOn     = DateTime.UtcNow.AddMinutes(60)
             };
         }

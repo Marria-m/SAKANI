@@ -366,7 +366,6 @@ namespace Sakani.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ProfileImageUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -740,6 +739,37 @@ namespace Sakani.DAL.Migrations
                     b.ToTable("PropertyIssues", (string)null);
                 });
 
+            modelBuilder.Entity("Sakani.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Sakani.Domain.Entities.Report", b =>
                 {
                     b.Property<int>("Id")
@@ -871,7 +901,6 @@ namespace Sakani.DAL.Migrations
                     b.HasBaseType("Sakani.Domain.Entities.ApplicationUser");
 
                     b.Property<string>("Bio")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -1093,6 +1122,17 @@ namespace Sakani.DAL.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("Sakani.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Sakani.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Sakani.Domain.Entities.Report", b =>
                 {
                     b.HasOne("Sakani.Domain.Entities.Admin", "Admin")
@@ -1180,6 +1220,8 @@ namespace Sakani.DAL.Migrations
                 {
                     b.Navigation("Feedbacks");
 
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("Reports");
 
                     b.Navigation("UserNotifications");
@@ -1236,8 +1278,7 @@ namespace Sakani.DAL.Migrations
 
                     b.Navigation("PropertyIssues");
 
-                    b.Navigation("WishListApartment")
-                        .IsRequired();
+                    b.Navigation("WishListApartment");
                 });
 #pragma warning restore 612, 618
         }

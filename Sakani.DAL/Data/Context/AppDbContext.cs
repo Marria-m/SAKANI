@@ -41,6 +41,9 @@ namespace Sakani.DAL.Data.Context
         public DbSet<Notificaion> Notifications { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }
 
+        // Auth
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
