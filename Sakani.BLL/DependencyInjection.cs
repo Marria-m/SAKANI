@@ -19,8 +19,8 @@ namespace Sakani.BLL
             // FluentValidation
             services.AddValidatorsFromAssembly(typeof(MappingProfile).Assembly);
 
-            // JWT Helper
-            services.AddSingleton<JwtTokenHelper>();
+            // JWT Helper (stateless)
+            services.AddTransient<JwtTokenHelper>();
 
             // Auth Service
             services.AddScoped<IAuthService, AuthService>();

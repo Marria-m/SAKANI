@@ -64,7 +64,7 @@ namespace SAKANI.Controllers
 
         [HttpPost("refresh-token")]
         [AllowAnonymous]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto dto)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -82,7 +82,7 @@ namespace SAKANI.Controllers
 
         [HttpPost("revoke-token")]
         [Authorize]
-        public async Task<IActionResult> RevokeToken([FromBody] TokenRequestDto dto)
+        public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequestDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

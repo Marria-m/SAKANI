@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Sakani.DAL.Data.Context;
 using Sakani.Domain.Interfaces;
+using System.Linq.Expressions;
 
 namespace Sakani.DAL.Repositories
 {
@@ -20,6 +21,9 @@ namespace Sakani.DAL.Repositories
 
         public async Task<T?> GetByIdAsync(int id)
             => await _dbSet.FindAsync(id);
+
+        public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
+            => await _dbSet.FirstOrDefaultAsync(predicate);
 
         public async Task AddAsync(T entity)
             => await _dbSet.AddAsync(entity);

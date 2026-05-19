@@ -1,83 +1,88 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Sakani.BLL.Core.DTOs;
 using Sakani.BLL.Core.Helpers;
 using Sakani.BLL.Core.Interfaces.Auth;
-using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
+using Sakani.Domain.Interfaces;
 
 namespace Sakani.BLL.Services
 {
     public class RefreshTokenService : IRefreshTokenService
     {
-        private readonly AppDbContext _context;
+        private readonly IRepository<RefreshToken> _refreshTokenRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly JwtTokenHelper _jwtHelper;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public RefreshTokenService(
-            AppDbContext context,
+            IRepository<RefreshToken> refreshtokenRepo,
+            IUnitOfWork unitOfWork,
             JwtTokenHelper jwtHelper,
             UserManager<ApplicationUser> userManager)
         {
-            _context     = context;
+            _refreshTokenRepo = refreshtokenRepo;
+            _unitOfWork  = unitOfWork;
             _jwtHelper   = jwtHelper;
             _userManager = userManager;
         }
 
-        // Creates a refresh token, saves it to DB, returns the raw token string
+        // Creates a refresh token, persists it via UoW, and returns the raw token string
         public async Task<string> CreateRefreshTokenAsync(int userId)
         {
             var token = _jwtHelper.GenerateRefreshToken();
 
-            _context.RefreshTokens.Add(new RefreshToken
+            await _refreshTokenRepo.AddAsync(new RefreshToken
             {
                 Token     = token,
                 ExpiresOn = DateTime.UtcNow.AddDays(7),
                 UserId    = userId
             });
-            await _context.SaveChangesAsync();
 
+            await _unitOfWork.SaveChangesAsync();
             return token;
         }
 
-        // Validates, rotates (revoke old & issue new) and return new UserDto
+        // Validates, rotates (revoke old & issue new), and returns a fresh UserDto
         public async Task<UserDto> RefreshTokenAsync(string refreshToken)
         {
-            var tokenEntity = await _context.RefreshTokens
-                .Include(t => t.User)
-                .SingleOrDefaultAsync(t => t.Token == refreshToken);
+            var tokenEntity = await _refreshTokenRepo.FindAsync(t => t.Token == refreshToken);
 
             if (tokenEntity is null || !tokenEntity.IsActive)
                 throw new Exception("Invalid or expired refresh token.");
 
+            // Load the associated user via Identity
+            var user = await _userManager.FindByIdAsync(tokenEntity.UserId.ToString())
+                ?? throw new Exception("User not found.");
+
             // Revoke old token (rotation)
             tokenEntity.RevokedOn = DateTime.UtcNow;
+            _refreshTokenRepo.Update(tokenEntity);
 
-            var roles           = await _userManager.GetRolesAsync(tokenEntity.User);
-            var newAccessToken  = _jwtHelper.GenerateAccessToken(tokenEntity.User, roles);
-            var newRefreshToken = await CreateRefreshTokenAsync(tokenEntity.UserId);
+            var roles                      = await _userManager.GetRolesAsync(user);
+            var (newAccessToken, expireOn) = _jwtHelper.GenerateAccessToken(user, roles);
+            var newRefreshToken            = await CreateRefreshTokenAsync(tokenEntity.UserId);
 
             return new UserDto
             {
-                FullName     = tokenEntity.User.FirstName,
-                Email        = tokenEntity.User.Email!,
+                FullName     = $"{user.FirstName} {user.LastName}".Trim(),
+                Email        = user.Email!,
                 Token        = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpireOn     = DateTime.UtcNow.AddMinutes(60)
+                ExpireOn     = expireOn
             };
         }
 
         // Soft-revokes by setting RevokedOn and return false if already inactive
         public async Task<bool> RevokeTokenAsync(string refreshToken)
         {
-            var tokenEntity = await _context.RefreshTokens
-                .SingleOrDefaultAsync(t => t.Token == refreshToken);
+            var tokenEntity = await _refreshTokenRepo.FindAsync(t => t.Token == refreshToken);
 
             if (tokenEntity is null || !tokenEntity.IsActive)
                 return false;
 
             tokenEntity.RevokedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            _refreshTokenRepo.Update(tokenEntity);
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
     }
