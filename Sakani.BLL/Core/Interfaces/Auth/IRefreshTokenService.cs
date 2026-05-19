@@ -2,7 +2,7 @@ using Sakani.BLL.Core.DTOs;
 
 namespace Sakani.BLL.Core.Interfaces.Auth
 {
-    public interface ITokenService
+    public interface IRefreshTokenService
     {
         // Generates a refresh token, persists it, and return the token string
         Task<string> CreateRefreshTokenAsync(int userId);

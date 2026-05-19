@@ -8,13 +8,13 @@ using Sakani.Domain.Entities;
 
 namespace Sakani.BLL.Services
 {
-    public class TokenService : ITokenService
+    public class RefreshTokenService : IRefreshTokenService
     {
         private readonly AppDbContext _context;
         private readonly JwtTokenHelper _jwtHelper;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public TokenService(
+        public RefreshTokenService(
             AppDbContext context,
             JwtTokenHelper jwtHelper,
             UserManager<ApplicationUser> userManager)

@@ -12,16 +12,16 @@ namespace Sakani.BLL.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenHelper _jwtHelper;
-        private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             JwtTokenHelper jwtHelper,
-            ITokenService tokenService)
+            IRefreshTokenService refreshTokenService)
         {
             _userManager  = userManager;
             _jwtHelper    = jwtHelper;
-            _tokenService = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         // Register
@@ -49,7 +49,7 @@ namespace Sakani.BLL.Services
             await _userManager.AddToRoleAsync(user, dto.Role.ToString());
 
             var roles = await _userManager.GetRolesAsync(user);
-            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user.Id);
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {
@@ -71,7 +71,7 @@ namespace Sakani.BLL.Services
                 throw new Exception("Invalid email or password.");
 
             var roles = await _userManager.GetRolesAsync(user);
-            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user.Id);
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {

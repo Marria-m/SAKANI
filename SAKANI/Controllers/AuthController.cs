@@ -10,12 +10,12 @@ namespace SAKANI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService  _authService;
-        private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthController(IAuthService authService, ITokenService tokenService)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
         {
             _authService  = authService;
-            _tokenService = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         [HttpPost("register")]
@@ -71,7 +71,7 @@ namespace SAKANI.Controllers
 
             try
             {
-                var result = await _tokenService.RefreshTokenAsync(dto.Token);
+                var result = await _refreshTokenService.RefreshTokenAsync(dto.RefreshToken);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace SAKANI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var success = await _tokenService.RevokeTokenAsync(dto.Token);
+            var success = await _refreshTokenService.RevokeTokenAsync(dto.RefreshToken);
             return success ? Ok("Token revoked.") : BadRequest("Invalid token.");
         }
     }
