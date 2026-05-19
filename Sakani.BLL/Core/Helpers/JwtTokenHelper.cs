@@ -17,7 +17,9 @@ namespace Sakani.BLL.Core.Helpers
             _config = config;
         }
 
-        public string GenerateAccessToken(ApplicationUser user, IList<string> roles)
+        // Generates a signed JWT access token and returns it alongside its exact expiry time
+        public (string Token, DateTime ExpiresOn) GenerateAccessToken(
+            ApplicationUser user, IList<string> roles)
         {
             var claims = new List<Claim>
             {
@@ -30,6 +32,9 @@ namespace Sakani.BLL.Core.Helpers
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
+            var durationMinutes = double.Parse(_config["JWT:DurationInMinutes"]!);
+            var expiresOn       = DateTime.UtcNow.AddMinutes(durationMinutes);
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["JWT:Key"]!));
 
@@ -37,14 +42,14 @@ namespace Sakani.BLL.Core.Helpers
                 issuer: _config["JWT:Issuer"],
                 audience: _config["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    double.Parse(_config["JWT:DurationInMinutes"]!)),
+                expires: expiresOn,
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return (new JwtSecurityTokenHandler().WriteToken(token), expiresOn);
         }
 
+        // Generates a cryptographically-random refresh token string
         public string GenerateRefreshToken()
         {
             var bytes = new byte[64];

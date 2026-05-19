@@ -27,18 +27,29 @@ namespace Sakani.BLL.Services
         // Register
         public async Task<UserDto> RegisterAsync(RegisterDto dto)
         {
-            ApplicationUser user = dto.Role == Role.OWNER
+            // Split FullName on the first space; anything after the first space becomes LastName
+            var spaceIndex = dto.FullName.IndexOf(' ');
+            var firstName  = spaceIndex > 0 ? dto.FullName[..spaceIndex].Trim() : dto.FullName.Trim();
+            var lastName   = spaceIndex > 0 ? dto.FullName[(spaceIndex + 1)..].Trim() : string.Empty;
+
+            ApplicationUser user = dto.Role == Role.Owner
                 ? new Owner
                   {
-                      FirstName = dto.FullName, LastName = "",
-                      Email = dto.Email, UserName = dto.Email,
-                      PhoneNumber = dto.PhoneNumber, IsActive = true
+                      FirstName   = firstName,
+                      LastName    = lastName,
+                      Email       = dto.Email,
+                      UserName    = dto.Email,
+                      PhoneNumber = dto.PhoneNumber,
+                      IsActive    = true
                   }
                 : new Tenant
                   {
-                      FirstName = dto.FullName, LastName = "",
-                      Email = dto.Email, UserName = dto.Email,
-                      PhoneNumber = dto.PhoneNumber, IsActive = true
+                      FirstName   = firstName,
+                      LastName    = lastName,
+                      Email       = dto.Email,
+                      UserName    = dto.Email,
+                      PhoneNumber = dto.PhoneNumber,
+                      IsActive    = true
                   };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -49,15 +60,16 @@ namespace Sakani.BLL.Services
             await _userManager.AddToRoleAsync(user, dto.Role.ToString());
 
             var roles = await _userManager.GetRolesAsync(user);
+            var (accessToken, expireOn) = _jwtHelper.GenerateAccessToken(user, roles);
             var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {
-                FullName     = user.FirstName,
+                FullName     = $"{user.FirstName} {user.LastName}".Trim(),
                 Email        = user.Email!,
-                Token        = _jwtHelper.GenerateAccessToken(user, roles),
+                Token        = accessToken,
                 RefreshToken = refreshToken,
-                ExpireOn     = DateTime.UtcNow.AddMinutes(60)
+                ExpireOn     = expireOn
             };
         }
 
@@ -71,15 +83,16 @@ namespace Sakani.BLL.Services
                 throw new Exception("Invalid email or password.");
 
             var roles = await _userManager.GetRolesAsync(user);
+            var (accessToken, expireOn) = _jwtHelper.GenerateAccessToken(user, roles);
             var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
 
             return new UserDto
             {
-                FullName = user.FirstName + " " + user.LastName,
+                FullName     = $"{user.FirstName} {user.LastName}".Trim(),
                 Email        = user.Email!,
-                Token        = _jwtHelper.GenerateAccessToken(user, roles),
+                Token        = accessToken,
                 RefreshToken = refreshToken,
-                ExpireOn     = DateTime.UtcNow.AddMinutes(60)
+                ExpireOn     = expireOn
             };
         }
     }
