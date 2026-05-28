@@ -31,43 +31,50 @@ namespace Sakani.BLL.Services
                             Message = "Failed to link external login to existing account."
                         };
                     }
-                    // Email not found case => create new user
-                    else {
-                        var nameParts = extDto.Name?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-                        user = new ApplicationUser
-                        {
-                            UserName = extDto.Email,
-                            Email = extDto.Email,
-                            FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
-                            LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty
-                        };
 
-                        var createResult = await userManager.CreateAsync(user);
-                        if (!createResult.Succeeded) {
-                            var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                            return new ExternalLoginResponseDto { IsSuccessful = false, Message = $"User registration failed: {errors}" };
-                        }
+                }
+            }   // Email not found case => create new user
+            else {
+                var nameParts = extDto.Name?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+                user = new ApplicationUser
+                {
+                    UserName = extDto.Email,
+                    Email = extDto.Email,
+                    FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
+                    LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty
+                };
+
+                var createResult = await userManager.CreateAsync(user);
+                if (!createResult.Succeeded) {
+                    var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                    return new ExternalLoginResponseDto { IsSuccessful = false, Message = $"User registration failed: {errors}" };
+                }
                         
-                        var loginResult = await userManager.AddLoginAsync(user, new UserLoginInfo(extDto.ProviderName, extDto.ProviderKey, extDto.ProviderName));
-                        if (!loginResult.Succeeded)
-                        {
-                           await userManager.DeleteAsync(user); // Rollback user creation if login linking fails
-                            var errors = string.Join(", ", loginResult.Errors.Select(e => e.Description));
-                            return new ExternalLoginResponseDto { IsSuccessful = false, Message = $"Failed to link external login: {errors}" };
-                        }
-
-                        // Define which roles a user is allowed to "choose" during social login
-                        var allowedRoles = new List<string> { "Tenant", "Owner"};
-
-                        // Determine which role to assign (Fallback to "Tenant" if the DTO value is invalid)
-                        var roleToAssign = allowedRoles.Contains(extDto.RequestedRole) ? extDto.RequestedRole : "Tenant";
-
-                        await userManager.AddToRoleAsync(user, roleToAssign);
-                    }
+                var loginResult = await userManager.AddLoginAsync(user, new UserLoginInfo(extDto.ProviderName, extDto.ProviderKey, extDto.ProviderName));
+                if (!loginResult.Succeeded)
+                {
+                    await userManager.DeleteAsync(user); // Rollback user creation if login linking fails
+                    var errors = string.Join(", ", loginResult.Errors.Select(e => e.Description));
+                    return new ExternalLoginResponseDto { IsSuccessful = false, Message = $"Failed to link external login: {errors}" };
                 }
 
-            }
+                // Define which roles a user is allowed to "choose" during social login
+                var allowedRoles = new List<string> { "Tenant", "Owner"};
 
+                // Determine which role to assign (Fallback to "Tenant" if the DTO value is invalid)
+                var roleToAssign = allowedRoles.Contains(extDto.RequestedRole) ? extDto.RequestedRole : "Tenant";
+
+                await userManager.AddToRoleAsync(user, roleToAssign);
+            }
+           
+
+            if (user == null) {
+                return new ExternalLoginResponseDto
+                {
+                    IsSuccessful = false,
+                    Message = "User not found."
+                };
+            }
 
             var role = await userManager.GetRolesAsync(user);
             var token = jwtHelper.GenerateAccessToken(user, role).Token;
