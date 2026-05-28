@@ -16,12 +16,14 @@ namespace SAKANI.Controllers
         private readonly IAuthService  _authService;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IExternalLoginServices _externalLoginServices;
 
-        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService, SignInManager<ApplicationUser> signInManager)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService, SignInManager<ApplicationUser> signInManager, IExternalLoginServices externalLoginServices)
         {
             _authService  = authService;
             _refreshTokenService = refreshTokenService;
             _signInManager = signInManager;
+            _externalLoginServices = externalLoginServices;
         }
 
         [HttpPost("register")]
@@ -105,7 +107,8 @@ namespace SAKANI.Controllers
              RequestedRole = ReqRole
             };
 
-            return Ok(extDto);
+            var result = await _externalLoginServices.ProcessExternalLoginAsync(extDto);
+            return Ok(result);
         }
 
 
