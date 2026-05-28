@@ -41,7 +41,10 @@ namespace Sakani.BLL.Services
                     UserName = extDto.Email,
                     Email = extDto.Email,
                     FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
-                    LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty
+                    LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty,
+                    ProfileImageUrl = string.IsNullOrEmpty(extDto.ProfilePictureUrl)
+                      ? "" // You could also put a default placeholder image URL here
+                      : extDto.ProfilePictureUrl
                 };
 
                 var createResult = await userManager.CreateAsync(user);

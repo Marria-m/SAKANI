@@ -94,6 +94,8 @@ namespace SAKANI.Controllers
 
             var Email = Info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
             var Name = Info.Principal.FindFirstValue(ClaimTypes.Name);
+            var pictureUrl = Info.Principal.FindFirstValue("picture")
+                 ?? Info.Principal.FindFirstValue("urn:google:picture");
 
             if (string.IsNullOrEmpty(Email))
                 return BadRequest(new { message = "Email claim not found in external login information." });
@@ -104,7 +106,8 @@ namespace SAKANI.Controllers
              Name = Name,
              ProviderKey = Info.ProviderKey,
              ProviderName = Info.LoginProvider,
-             RequestedRole = ReqRole
+             RequestedRole = ReqRole,
+             ProfilePictureUrl = pictureUrl
             };
 
             var result = await _externalLoginServices.ProcessExternalLoginAsync(extDto);
