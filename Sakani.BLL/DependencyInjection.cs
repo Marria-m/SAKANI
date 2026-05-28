@@ -24,6 +24,7 @@ namespace Sakani.BLL
 
             // Auth Service
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IExternalLoginServices, ExternalLoginService>();
 
             // Token Service
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();

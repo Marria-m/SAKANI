@@ -56,6 +56,18 @@ namespace SAKANI
                 };
             });
 
+            // add Google Authentication
+            var google = builder.Configuration.GetSection("Authentication:Google");
+            builder.Services.AddAuthentication(options => {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            }).AddGoogle(options =>
+            {
+                options.ClientId = google["ClientId"]!;
+                options.ClientSecret = google["ClientSecret"]!;
+                options.CallbackPath = "/signin-google";
+            }
+            );
 
             builder.Services.AddControllers();
 
