@@ -9,5 +9,6 @@ namespace Sakani.BLL.Core.DTOs.AuthDTOs.ExternalAuthDTOs
         public string Email{ get; set; }
 
         public string RequestedRole { get; set; }
+        public string? ProfilePictureUrl { get; set; }
     }
 }
