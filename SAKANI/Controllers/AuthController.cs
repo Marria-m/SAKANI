@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Sakani.BLL.Core.DTOs.AuthDTOs;
+using Sakani.BLL.Core.DTOs.AuthDTOs.ExternalAuthDTOs;
 using Sakani.BLL.Core.Interfaces.Auth;
+using Sakani.Domain.Entities;
+using System.Security.Claims;
 
 namespace SAKANI.Controllers
 {
@@ -11,11 +15,15 @@ namespace SAKANI.Controllers
     {
         private readonly IAuthService  _authService;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IExternalLoginServices _externalLoginServices;
 
-        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService, SignInManager<ApplicationUser> signInManager, IExternalLoginServices externalLoginServices)
         {
             _authService  = authService;
             _refreshTokenService = refreshTokenService;
+            _signInManager = signInManager;
+            _externalLoginServices = externalLoginServices;
         }
 
         [HttpPost("register")]
@@ -61,6 +69,53 @@ namespace SAKANI.Controllers
                 });
             }
         }
+
+
+        // External Login 
+        [HttpGet("External-Login")]
+        public async Task<IActionResult> ExternalLogin(string Provider , string role = "Tenant" ) {
+
+            var redirectUrl = Url.Action(nameof(ExternalCallBack),"Auth");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(Provider, redirectUrl);
+            properties.Items["role"] = role; // Pass the role as part of the authentication properties
+            return Challenge(properties,Provider);
+        }
+
+
+
+
+        [HttpGet("External-Login-Callback")]
+        public async Task<IActionResult> ExternalCallBack() {
+            var Info = await _signInManager.GetExternalLoginInfoAsync();
+            if (Info == null)
+                return BadRequest(new { message = "Error loading external login information from provider." });
+
+            var ReqRole = Info.AuthenticationProperties.Items.ContainsKey("requestedRole") ? Info.AuthenticationProperties.Items["requestedRole"] : "Tenant";
+
+            var Email = Info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+            var Name = Info.Principal.FindFirstValue(ClaimTypes.Name);
+            var pictureUrl = Info.Principal.FindFirstValue("picture")
+                 ?? Info.Principal.FindFirstValue("urn:google:picture");
+
+            if (string.IsNullOrEmpty(Email))
+                return BadRequest(new { message = "Email claim not found in external login information." });
+
+            var extDto = new ExternalAuthDto
+            {
+             Email = Email,
+             Name = Name,
+             ProviderKey = Info.ProviderKey,
+             ProviderName = Info.LoginProvider,
+             RequestedRole = ReqRole,
+             ProfilePictureUrl = pictureUrl
+            };
+
+            var result = await _externalLoginServices.ProcessExternalLoginAsync(extDto);
+            return Ok(result);
+        }
+
+
+
 
         [HttpPost("refresh-token")]
         [AllowAnonymous]

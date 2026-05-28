@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 38f04fa9-40ae-4956-bce6-450ccd8e95ff
+
+localResources:
+  specs:
+    - ..\SAKANI\obj\Debug\net8.0\EndpointInfo\SAKANI.json
