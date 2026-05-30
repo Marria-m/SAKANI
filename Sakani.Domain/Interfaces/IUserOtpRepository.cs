@@ -9,6 +9,6 @@ namespace Sakani.Domain.Interfaces
 {
     public interface IUserOtpRepository : IRepository<UserOtp>
     {
-        Task<UserOtp> GetLastActiveByEmailAsync(string email);
+        Task<UserOtp?> GetLastActiveByEmailAsync(string email);
     }
 }

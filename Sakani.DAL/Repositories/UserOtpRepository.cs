@@ -1,4 +1,5 @@
-﻿using Nest;
+﻿using Microsoft.EntityFrameworkCore;
+using Nest;
 using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
@@ -14,9 +15,12 @@ namespace Sakani.DAL.Repositories
     {
         public UserOtpRepository(AppDbContext context) : base(context){}
 
-        public Task<UserOtp> GetLastActiveByEmailAsync(string email)
+        public async Task<UserOtp?> GetLastActiveByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            return await _context.UserOtp
+                .Where(u => u.Email == email && u.IsActive)
+                .OrderByDescending(u => u.CreatedAt)
+                .FirstOrDefaultAsync();
         }
     }
 }

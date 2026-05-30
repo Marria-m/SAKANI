@@ -44,6 +44,8 @@ namespace Sakani.DAL.Data.Context
         // Auth
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        public DbSet<UserOtp> UserOtp { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
