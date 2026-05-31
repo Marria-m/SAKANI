@@ -16,12 +16,7 @@ namespace Sakani.BLL.Services
 
         public async Task<UserOtp> GenerateOtpAsync(string email)
         {
-            var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
-            if (existOtp != null) {
-                existOtp.IsActive = false;
-                userOtp.Update(existOtp);
-            } 
-
+            await RevokeOTP(email);
             var resultOtp = new UserOtp
             {
                 Email = email,
@@ -36,16 +31,41 @@ namespace Sakani.BLL.Services
         {
             var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
             if (existOtp != null) { 
-                existOtp.IsActive = false;
-                userOtp.Update(existOtp);
+                await RevokeOtp(existOtp);
             }
         }
-        public Task<bool> ValidateOtpAsync(string email, string submittedCode)
+        public async Task<bool> ValidateOtpAsync(string email, string submittedCode)
         {
-            throw new NotImplementedException();
+            var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
+            if (existOtp == null) return false;
+            if (string.IsNullOrWhiteSpace(submittedCode)) return false;
+
+            if (existOtp.IsExpired) {
+                await RevokeOtp(existOtp);
+                return false; 
+            }
+
+            if (existOtp.OTPCode != submittedCode) {
+                existOtp.FailedAttempts++;
+                userOtp.Update(existOtp);
+                return false;
+            }
+
+            if (existOtp.FailedAttempts >= 5) { 
+                await RevokeOtp(existOtp);
+                return false;
+            } 
+
+
+            await RevokeOtp(existOtp);
+            return true;
         }
 
-
+        private async Task RevokeOtp(UserOtp otp) {
+            if (otp == null) return;
+            otp.IsActive = false;
+            userOtp.Update(otp);
+        }
         private string GenerateRandomOtp()
         {
             int code = RandomNumberGenerator.GetInt32(0, 999999);

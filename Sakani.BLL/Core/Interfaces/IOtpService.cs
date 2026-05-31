@@ -9,7 +9,7 @@ namespace Sakani.BLL.Core.Interfaces
 {
     public interface IOtpService
     {
-        Task<UserOtp?> GenerateOtpAsync(string email);
+        Task<UserOtp> GenerateOtpAsync(string email);
         Task<bool> ValidateOtpAsync(string email, string submittedCode);
         Task RevokeOTP(string email);
     }
