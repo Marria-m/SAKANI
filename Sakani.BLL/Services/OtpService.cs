@@ -4,6 +4,7 @@ using Sakani.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,13 @@ namespace Sakani.BLL.Services
         public Task<bool> ValidateOtpAsync(string email, string submittedCode)
         {
             throw new NotImplementedException();
+        }
+
+
+        private string GenerateRandomOtp()
+        {
+            int code = RandomNumberGenerator.GetInt32(0, 999999);
+            return code.ToString("D6");
         }
     }
 }
