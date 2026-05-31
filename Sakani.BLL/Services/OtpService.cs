@@ -16,6 +16,17 @@ namespace Sakani.BLL.Services
 
         public async Task<UserOtp> GenerateOtpAsync(string email)
         {
+            var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
+            if (existOtp != null)
+            {
+                var timeSinceSent = DateTime.UtcNow - existOtp.CreatedAt;
+                if (timeSinceSent.TotalSeconds < 60)
+                {
+                    throw new Exception("Please wait 60 seconds before requesting a new code.");
+                }
+                await RevokeOtp(existOtp);
+
+            }
             await RevokeOTP(email);
             var resultOtp = new UserOtp
             {
