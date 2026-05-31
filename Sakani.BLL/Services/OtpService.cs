@@ -1,5 +1,6 @@
 ﻿using Sakani.BLL.Core.Interfaces;
 using Sakani.BLL.Core.Interfaces.Auth;
+using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,31 @@ namespace Sakani.BLL.Services
     public class OtpService(IUserOtpRepository userOtp) : IOtpService
     {
 
-        public Task<string> GenerateOtpAsync(string email)
+        public async Task<UserOtp> GenerateOtpAsync(string email)
         {
-            throw new NotImplementedException();
+            var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
+            if (existOtp != null) {
+                existOtp.IsActive = false;
+                userOtp.Update(existOtp);
+            } 
+
+            var resultOtp = new UserOtp
+            {
+                Email = email,
+                OTPCode = GenerateRandomOtp(),
+                IsActive = true,
+                ExpiredAt = DateTime.UtcNow.AddMinutes(5)
+            };
+            await userOtp.AddAsync(resultOtp);
+            return resultOtp;
         }
-        public Task RevokeOTP(string email)
+        public async Task RevokeOTP(string email)
         {
-            throw new NotImplementedException();
+            var existOtp = await userOtp.GetLastActiveByEmailAsync(email);
+            if (existOtp != null) { 
+                existOtp.IsActive = false;
+                userOtp.Update(existOtp);
+            }
         }
         public Task<bool> ValidateOtpAsync(string email, string submittedCode)
         {
