@@ -1,4 +1,5 @@
-﻿using Sakani.BLL.Core.Interfaces;
+using Sakani.BLL.Core.DTOs.AuthDTOs;
+using Sakani.BLL.Core.Interfaces;
 using Sakani.BLL.Core.Interfaces.Auth;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
@@ -25,9 +26,7 @@ namespace Sakani.BLL.Services
                     throw new Exception("Please wait 60 seconds before requesting a new code.");
                 }
                 await RevokeOtp(existOtp);
-
             }
-            await RevokeOTP(email);
             var resultOtp = new UserOtp
             {
                 Email = email,
@@ -56,22 +55,25 @@ namespace Sakani.BLL.Services
                 return false; 
             }
 
-            if (existOtp.OTPCode != submittedCode) {
-                existOtp.FailedAttempts++;
-                userOtp.Update(existOtp);
+            if (existOtp.FailedAttempts >= 5) {
+                await RevokeOtp(existOtp);
                 return false;
             }
 
-            if (existOtp.FailedAttempts >= 5) { 
-                await RevokeOtp(existOtp);
+            if (existOtp.OTPCode != submittedCode) {
+                existOtp.FailedAttempts++;
+                if (existOtp.FailedAttempts >= 5) {
+                    await RevokeOtp(existOtp);
+                }
+                else {
+                    userOtp.Update(existOtp);
+                }
                 return false;
-            } 
-
+            }
 
             await RevokeOtp(existOtp);
             return true;
         }
-
         private async Task RevokeOtp(UserOtp otp) {
             if (otp == null) return;
             otp.IsActive = false;
@@ -79,7 +81,7 @@ namespace Sakani.BLL.Services
         }
         private string GenerateRandomOtp()
         {
-            int code = RandomNumberGenerator.GetInt32(0, 999999);
+            int code = RandomNumberGenerator.GetInt32(0, 1000000);
             return code.ToString("D6");
         }
     }

@@ -21,8 +21,7 @@ namespace SAKANI.Controllers
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IExternalLoginServices _externalLoginServices;
-        private readonly IOtpService _otpService;
-        private readonly ISenderService _emailService;
+
 
         public AuthController(IAuthService authService
             , IRefreshTokenService refreshTokenService
@@ -81,7 +80,6 @@ namespace SAKANI.Controllers
         }
 
 
-        // External Login 
         [HttpGet("External-Login")]
         public async Task<IActionResult> ExternalLogin(string Provider, string role = "Tenant")
         {
@@ -159,26 +157,29 @@ namespace SAKANI.Controllers
         [HttpPost("request-otp")]
         public async Task<IActionResult> RequestOtp([FromBody] RequestOtpDto dto)
         {
-            var generatedOtp = await _otpService.GenerateOtpAsync(dto.Email);
-            string subject = "Your OTP Code";
-            string message = $@"
-                            <h2>Welcome to the Event!</h2>
-                            <p>Your secure registration code is: <strong>{generatedOtp.OTPCode}</strong></p>
-                            <p>This code will expire in 5 minutes.</p>";
-
-            await _emailService.SendEmailAsync(dto.Email, subject, message);
-            return Ok(new { message = "OTP sent successfully." });
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try {
+                var successMessage= await _authService.RegisterWithOtp(dto);
+                return Ok(new { message = successMessage });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
         {
-            var isValid = await _otpService.ValidateOtpAsync(dto.Email, dto.SubmittedCode);
-
-            if (!isValid)
-                return BadRequest(new { message = "Invalid OTP." });
-
-            return Ok(new { message = "OTP verified successfully." });
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try {
+                var userResult = await _authService.ValidateRegistrationOtp(dto);
+                return Ok(userResult);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("resend-otp")]
@@ -186,12 +187,8 @@ namespace SAKANI.Controllers
         {
             try
             {
-                var generatedOtp = await _otpService.GenerateOtpAsync(dto.Email);
-
-                string body = $@"<h2>Your New OTP Code</h2><p>{generatedOtp.OTPCode}</p>";
-                await _emailService.SendEmailAsync(dto.Email, "New Code", body);
-
-                return Ok(new { message = "A new OTP has been sent." });
+                var successMessage = await _authService.ResendOtpAsync(dto.Email);
+                return Ok(new { message = successMessage });
             }
             catch (Exception ex)
             {

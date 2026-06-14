@@ -12,5 +12,10 @@ namespace Sakani.BLL.Core.Interfaces.Auth
     {
         Task<UserDto> RegisterAsync(RegisterDto registerDto);
         Task<UserDto> LoginAsync(LoginDto loginDto);
+
+        // Otp register 
+        Task<string> RegisterWithOtp(RequestOtpDto dto);
+        Task<UserDto> ValidateRegistrationOtp(VerifyOtpDto dto);
+        Task<string> ResendOtpAsync(string email);
     }
 }

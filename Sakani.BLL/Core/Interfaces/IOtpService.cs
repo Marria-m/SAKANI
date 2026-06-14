@@ -1,4 +1,5 @@
-﻿using Sakani.Domain.Entities;
+using Sakani.BLL.Core.DTOs.AuthDTOs;
+using Sakani.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
