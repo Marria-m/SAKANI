@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Sakani.BLL.Core.DTOs;
 using Sakani.BLL.Core.DTOs.AuthDTOs;
 using Sakani.BLL.Core.DTOs.AuthDTOs.ExternalAuthDTOs;
@@ -155,6 +156,7 @@ namespace SAKANI.Controllers
         
         
         [HttpPost("request-otp")]
+        [EnableRateLimiting("TokenBucket")]
         public async Task<IActionResult> RequestOtp([FromBody] RequestOtpDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -169,6 +171,7 @@ namespace SAKANI.Controllers
         }
 
         [HttpPost("verify-otp")]
+        [EnableRateLimiting("TokenBucket")]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -183,6 +186,7 @@ namespace SAKANI.Controllers
         }
 
         [HttpPost("resend-otp")]
+        [EnableRateLimiting("TokenBucket")]
         public async Task<IActionResult> ResendOtp([FromBody] RequestOtpDto dto)
         {
             try

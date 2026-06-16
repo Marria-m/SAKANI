@@ -8,6 +8,7 @@ using Sakani.DAL;
 using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
 using System.Text;
+using System.Threading.RateLimiting;
 
 namespace SAKANI
 {
@@ -69,6 +70,27 @@ namespace SAKANI
             }
             );
 
+
+            // add rate limiting using token bucket algorithm
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.AddPolicy("TokenBucket", httpContext =>
+                    RateLimitPartition.GetTokenBucketLimiter(
+                    // Use the client's IP address as the unique key for their bucket
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                    factory: partitionKey => new TokenBucketRateLimiterOptions
+                    {
+                        TokenLimit = 3,                  // Maximum of 3 attempts stored
+                        TokensPerPeriod = 1,             // Refill 1 token at a time
+                        ReplenishmentPeriod = TimeSpan.FromMinutes(2), // ...every 2 minutes
+                        AutoReplenishment = true,
+                        QueueLimit = 0,                  // Reject extra spams instantly
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    })
+                );
+            });
+
             builder.Services.AddControllers();
 
             // Swagger with Bearer security
@@ -104,6 +126,7 @@ namespace SAKANI
 
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
