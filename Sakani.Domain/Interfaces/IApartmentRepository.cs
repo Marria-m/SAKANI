@@ -9,5 +9,6 @@ namespace Sakani.Domain.Interfaces
         Task<IReadOnlyList<Apartment>> GetByOwnerIdAsync(int ownerId);
         Task<bool> IsOwnedByAsync(int apartmentId, int ownerId);
         Task<IReadOnlyList<Apartment>> GetFilteredAsync(ApartmentFilterDto filter);
+        Task<int> CountFilteredAsync(ApartmentFilterDto filter);
     }
 }

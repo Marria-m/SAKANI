@@ -15,5 +15,8 @@ namespace Sakani.Domain.DTOs
         public AppartmentStatus? Status { get; set; }
         public GenderPolices? GenderPolices { get; set; }
         public List<string>? Amenities { get; set; } = new();
+        public List<int>? AmenityIds { get; set; } = new();
+        public int PageIndex { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
     }
 }

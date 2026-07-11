@@ -1,5 +1,6 @@
 using AutoMapper;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
+using Sakani.BLL.Core.DTOs.WishListDTOs;
 using Sakani.Domain.Entities;
 
 namespace Sakani.BLL.Mapping
@@ -15,6 +16,8 @@ namespace Sakani.BLL.Mapping
             CreateMap<Amenities, AmenitiesDto>().ReverseMap();
 
             CreateMap<OwnerApartmentRequestDto, Apartment>();
+
+            CreateMap<WishListApartment, WishListDto>();
         }
     }
 }
