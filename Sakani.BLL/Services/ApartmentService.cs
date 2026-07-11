@@ -1,3 +1,5 @@
+using AutoMapper;
+using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.Interfaces;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
@@ -10,31 +12,37 @@ namespace Sakani.BLL.Services
     {
         private readonly IApartmentRepository _apartmentRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ApartmentService(IApartmentRepository apartmentRepository, IUnitOfWork unitOfWork)
+        public ApartmentService(IApartmentRepository apartmentRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _apartmentRepository = apartmentRepository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Apartment>> GetAllAsync()
+        public async Task<IEnumerable<TenantApartmentDto>> GetAllAsync()
         {
-            return await _apartmentRepository.GetAllAsync();
+            var apartments = await _apartmentRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<TenantApartmentDto>>(apartments);
         }
 
-        public async Task<Apartment?> GetByIdAsync(int id)
+        public async Task<TenantApartmentDto?> GetByIdAsync(int id)
         {
-            return await _apartmentRepository.GetByIdAsync(id);
+            var apartment = await _apartmentRepository.GetByIdAsync(id);
+            return _mapper.Map<TenantApartmentDto?>(apartment);
         }
 
-        public async Task<Apartment?> GetWithDetailsAsync(int id)
+        public async Task<TenantApartmentDto?> GetWithDetailsAsync(int id)
         {
-            return await _apartmentRepository.GetWithDetailsAsync(id);
+            var apartment = await _apartmentRepository.GetWithDetailsAsync(id);
+            return _mapper.Map<TenantApartmentDto?>(apartment);
         }
 
-        public async Task<IReadOnlyList<Apartment>> GetByOwnerIdAsync(int ownerId)
+        public async Task<IReadOnlyList<TenantApartmentDto>> GetByOwnerIdAsync(int ownerId)
         {
-            return await _apartmentRepository.GetByOwnerIdAsync(ownerId);
+            var apartments = await _apartmentRepository.GetByOwnerIdAsync(ownerId);
+            return _mapper.Map<IReadOnlyList<TenantApartmentDto>>(apartments);
         }
 
         public async Task<bool> IsOwnedByAsync(int apartmentId, int ownerId)
@@ -42,16 +50,26 @@ namespace Sakani.BLL.Services
             return await _apartmentRepository.IsOwnedByAsync(apartmentId, ownerId);
         }
 
-        public async Task CreateAsync(Apartment apartment)
+        public async Task<TenantApartmentDto> CreateAsync(OwnerApartmentRequestDto dto)
         {
+            var apartment = _mapper.Map<Apartment>(dto);
             await _apartmentRepository.AddAsync(apartment);
             await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<TenantApartmentDto>(apartment);
         }
 
-        public async Task UpdateAsync(Apartment apartment)
+        public async Task<TenantApartmentDto?> UpdateAsync(int id, OwnerApartmentRequestDto dto)
         {
+            var apartment = await _apartmentRepository.GetByIdAsync(id);
+            if (apartment == null)
+            {
+                return null;
+            }
+
+            _mapper.Map(dto, apartment);
             _apartmentRepository.Update(apartment);
             await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<TenantApartmentDto>(apartment);
         }
 
         public async Task<bool> DeleteAsync(int id)
