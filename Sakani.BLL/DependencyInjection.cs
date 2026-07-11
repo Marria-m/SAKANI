@@ -36,6 +36,9 @@ namespace Sakani.BLL
             // Token Service
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+            // Apartment Service
+            services.AddScoped<IApartmentService, ApartmentService>();
+
             return services;
         }
     }
