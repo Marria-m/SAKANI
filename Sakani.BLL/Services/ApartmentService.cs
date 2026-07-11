@@ -1,6 +1,7 @@
 using AutoMapper;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.Interfaces;
+using Sakani.Domain.DTOs;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
 using System.Collections.Generic;
@@ -83,6 +84,13 @@ namespace Sakani.BLL.Services
             _apartmentRepository.Delete(apartment);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+        public async Task<(IReadOnlyList<TenantApartmentDto> Items, int TotalCount)> GetFilteredApartmentsAsync(ApartmentFilterDto filterDto)
+        {
+            var apartments = await _apartmentRepository.GetFilteredAsync(filterDto);
+            var totalCount = await _apartmentRepository.CountFilteredAsync(filterDto);
+
+            return (_mapper.Map<List<TenantApartmentDto>>(apartments), totalCount);
         }
     }
 }
