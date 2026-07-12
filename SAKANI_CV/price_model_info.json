@@ -1,0 +1,36 @@
+{
+  "task": "Apartment Price Prediction",
+  "best_model": "Gradient Boosting",
+  "features": [
+    "city_enc",
+    "gender_enc",
+    "num_rooms",
+    "distance_km",
+    "avg_rating",
+    "num_amenities",
+    "floor",
+    "area_sqm",
+    "is_furnished"
+  ],
+  "metrics": {
+    "mae": 183.47,
+    "rmse": 228.86,
+    "r2": 0.9475
+  },
+  "is_scaled": false,
+  "city_averages": {
+    "mean": {
+      "اسيوط": 4701.5,
+      "الاسكندرية": 5870.0,
+      "الجيزة": 6296.7,
+      "الزقازيق": 4808.5,
+      "الفيوم": 4705.9,
+      "القاهرة": 6628.7,
+      "المنصورة": 5070.3,
+      "المنوفية": 4903.8,
+      "سوهاج": 4720.1,
+      "طنطا": 4936.2
+    }
+  },
+  "output": "Predicted fair price in EGP/month"
+}

@@ -1,0 +1,22 @@
+{
+  "task": "Apartment Image Quality Assessment",
+  "best_method": "Laplacian",
+  "thresholds": {
+    "laplacian_variance": 100.0,
+    "min_resolution": 300,
+    "brightness_min": 40,
+    "brightness_max": 220
+  },
+  "output": {
+    "is_acceptable": "bool",
+    "quality_score": "float 0.0-1.0",
+    "issues": "list of strings",
+    "details": "sharpness_score, resolution, brightness"
+  },
+  "metrics": {
+    "laplacian_spearman": 0.5053,
+    "brisque_spearman": 0.0262,
+    "winner": "Laplacian",
+    "note": "Evaluated on TID2013 blur subset. Production use on apartment images."
+  }
+}
