@@ -266,7 +266,7 @@ namespace Sakani.BLL.Services
             var request = new PricePredictionRequestDto
             {
                 City = apartment.City,
-                GenderPolicy = apartment.GenderPolices.ToString(),
+                GenderPolicy = apartment.GenderPolices.ToString().ToUpper(),
                 NumRooms = apartment.NoOfRooms,
                 DistanceKm = apartment.DistanceKm,
                 AvgRating = apartment.Owner?.AvgRating ?? 0.0,
