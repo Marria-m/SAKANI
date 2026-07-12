@@ -91,6 +91,18 @@ namespace SAKANI
                 );
             });
 
+            // CORS for React frontend
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactDev", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             builder.Services.AddControllers();
 
             // Swagger with Bearer security
@@ -124,8 +136,16 @@ namespace SAKANI
                         await roleManager.CreateAsync(new IdentityRole<int>(role));
             }
 
+            // Ensure wwwroot/uploads directories exist
+            var uploadsPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "apartments"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "profiles"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "issues"));
+
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseCors("AllowReactDev");
+            app.UseStaticFiles(); // serve wwwroot/uploads/*
             app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();

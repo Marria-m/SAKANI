@@ -36,6 +36,17 @@ namespace Sakani.BLL
             // Token Service
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+            // AI Service (Python microservice at localhost:8001)
+            services.AddHttpClient<IAiService, AiService>(client =>
+            {
+                client.BaseAddress = new Uri(
+                    configuration["AiService:BaseUrl"] ?? "http://localhost:8001");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            // File Service (wwwroot/uploads)
+            services.AddScoped<IFileService, FileService>();
+
             return services;
         }
     }
