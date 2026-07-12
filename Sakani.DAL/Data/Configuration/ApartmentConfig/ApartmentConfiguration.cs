@@ -49,6 +49,18 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
             builder.Property(a => a.GenderPolices)
                 .IsRequired();
 
+            builder.Property(a => a.DistanceKm)
+                .IsRequired();
+
+            builder.Property(a => a.Floor)
+                .IsRequired();
+
+            builder.Property(a => a.AreaSqm)
+                .IsRequired();
+
+            builder.Property(a => a.IsFurnished)
+                .IsRequired();
+
             // Relationships
             builder.HasOne(a => a.Owner)
                 .WithMany(o => o.Apartments)
