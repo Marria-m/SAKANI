@@ -21,6 +21,10 @@ namespace Sakani.Domain.Entities
         public bool IsBarginAllowed { get; set; } 
         public AppartmentStatus Status { get; set; }
         public GenderPolices GenderPolices { get; set; }
+        public double DistanceKm { get; set; }
+        public int Floor { get; set; }
+        public int AreaSqm { get; set; }
+        public bool IsFurnished { get; set; }
         #endregion
 
         // Navigation Properties
