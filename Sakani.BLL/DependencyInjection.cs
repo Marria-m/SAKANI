@@ -47,6 +47,9 @@ namespace Sakani.BLL
             // File Service (wwwroot/uploads)
             services.AddScoped<IFileService, FileService>();
 
+            // Apartment Service
+            services.AddScoped<IApartmentService, ApartmentService>();
+
             return services;
         }
     }
