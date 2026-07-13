@@ -7,6 +7,6 @@ namespace Sakani.BLL.Core.DTOs.WishListDTOs
     {
         public int Id { get; set; }
         public int TenantId { get; set; }
-        public List<TenantApartmentDto> Apartments { get; set; } = new();
+        public List<TenantApartmentDto> Apartments { get; set; } 
     }
 }

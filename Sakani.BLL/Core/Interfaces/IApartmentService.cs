@@ -1,5 +1,4 @@
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
-using Sakani.Domain.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

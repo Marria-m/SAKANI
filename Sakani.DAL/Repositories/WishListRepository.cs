@@ -23,7 +23,8 @@ namespace Sakani.DAL.Repositories
         public async Task<bool> ExistsAsync(int tenantId, int apartmentId)
         {
             return await _dbSet
-                .AnyAsync(w => w.TenantId == tenantId && w.Apartments.Any(a => a.Id == apartmentId));
+                .AnyAsync(w => w.TenantId == tenantId && w.Apartments
+                .Any(a => a.Id == apartmentId));
         }
     }
 }
