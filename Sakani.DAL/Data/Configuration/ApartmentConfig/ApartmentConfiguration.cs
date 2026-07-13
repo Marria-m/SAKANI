@@ -61,6 +61,42 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
             builder.Property(a => a.IsFurnished)
                 .IsRequired();
 
+            builder.Property(a => a.ApartmentType)
+                .IsRequired(false);
+
+            builder.Property(a => a.SecurityDeposit)
+                .IsRequired();
+
+            builder.Property(a => a.ElectricityType)
+                .IsRequired(false);
+
+            builder.Property(a => a.IsElectricityIncluded)
+                .IsRequired();
+
+            builder.Property(a => a.GasType)
+                .IsRequired(false);
+
+            builder.Property(a => a.DistanceMinutes)
+                .IsRequired();
+
+            builder.Property(a => a.NearbyServices)
+                .IsRequired();
+
+            builder.Property(a => a.Latitude)
+                .IsRequired(false);
+
+            builder.Property(a => a.Longitude)
+                .IsRequired(false);
+
+            builder.Property(a => a.IsVerified)
+                .IsRequired();
+
+            builder.Property(a => a.ViewsCount)
+                .IsRequired();
+
+            builder.Property(a => a.ListingStatus)
+                .IsRequired();
+
             // Relationships
             builder.HasOne(a => a.Owner)
                 .WithMany(o => o.Apartments)
