@@ -9,6 +9,8 @@ namespace Sakani.Domain.Interfaces
 
         // Finds the first entity matching the predicate or null
         Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
+        IQueryable<T> Query();
 
         Task AddAsync(T entity);
         void Update(T entity);

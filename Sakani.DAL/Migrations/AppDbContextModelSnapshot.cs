@@ -200,6 +200,9 @@ namespace Sakani.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AreaSqm")
+                        .HasColumnType("int");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -216,6 +219,12 @@ namespace Sakani.DAL.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<double>("DistanceKm")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Floor")
+                        .HasColumnType("int");
+
                     b.Property<int>("GenderPolices")
                         .HasColumnType("int");
 
@@ -223,6 +232,9 @@ namespace Sakani.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFurnished")
                         .HasColumnType("bit");
 
                     b.Property<string>("Location")
