@@ -55,11 +55,6 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
                 .HasForeignKey(a => a.OwnerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(a => a.WishListApartment)
-                .WithMany(w => w.Apartments)
-                .HasForeignKey(a => a.WishListApartmentId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             builder.HasMany(a => a.Media)
                 .WithOne(m => m.Apartment)
                 .HasForeignKey(m => m.ApartmentId)

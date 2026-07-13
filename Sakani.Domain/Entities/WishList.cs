@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Sakani.Domain.Entities
 {
-    public class WishListApartment : BaseEntity
+    public class WishList: BaseEntity
     {
+        // Navigation Properties
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
-        public int ApartmentId { get; set; }
-        public Apartment Apartment { get; set; }
+        public List<WishListApartment> WishListApartments { get; set; } 
     }
 }

@@ -18,6 +18,7 @@ namespace Sakani.DAL.Data.Context
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<ApartmentMedia> ApartmentMedia { get; set; }
         public DbSet<Amenities> Amenities { get; set; }
+        public DbSet<WishList> WishLists { get; set; }
         public DbSet<WishListApartment> WishListApartments { get; set; }
 
         // Transactions

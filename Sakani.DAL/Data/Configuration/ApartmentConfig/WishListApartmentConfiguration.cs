@@ -8,19 +8,21 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
     {
         public void Configure(EntityTypeBuilder<WishListApartment> builder)
         {
-            // TPT Mapping
             builder.ToTable("WishListApartments");
 
-            // Relationships
-            builder.HasOne(w => w.Tenant)
-                .WithOne(t => t.WishListApartment)
-                .HasForeignKey<WishListApartment>(w => w.TenantId)
-                .OnDelete(DeleteBehavior.NoAction);
+            // Composite Primary Key
+            builder.HasKey(wa => wa.Id);
 
-            builder.HasMany(w => w.Apartments)
-                .WithOne(a => a.WishListApartment)
-                .HasForeignKey(a => a.WishListApartmentId)
-                .OnDelete(DeleteBehavior.NoAction);
+            // Relationships
+            builder.HasOne(wa => wa.Tenant)
+                .WithMany()
+                .HasForeignKey(wa => wa.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(wa => wa.Apartment)
+                .WithMany(a => a.WishListApartments)
+                .HasForeignKey(wa => wa.ApartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

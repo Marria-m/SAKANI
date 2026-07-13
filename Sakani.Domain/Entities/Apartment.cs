@@ -24,8 +24,7 @@ namespace Sakani.Domain.Entities
         #endregion
 
         // Navigation Properties
-        public int? WishListApartmentId { get; set; }
-        public WishListApartment WishListApartment { get; set; }
+        public List<WishListApartment> WishListApartments { get; set; } = new();
         public int OwnerId { get; set; }
         public Owner Owner { get; set; }
         public List<ApartmentMedia> Media { get; set; } 

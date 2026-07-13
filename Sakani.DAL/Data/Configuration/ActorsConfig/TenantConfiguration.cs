@@ -37,11 +37,6 @@ namespace Sakani.DAL.Data.Configuration.ActorsConfig
                 .IsRequired();
 
             // Relationships
-            builder.HasOne(t => t.WishListApartment)
-                .WithOne(w => w.Tenant)
-                .HasForeignKey<Tenant>(t => t.WishListApartmentId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             builder.HasMany(t => t.PropertyIssues)
                 .WithOne(p => p.Tenant)
                 .HasForeignKey(p => p.TenantId)

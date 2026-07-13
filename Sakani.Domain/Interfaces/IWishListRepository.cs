@@ -8,5 +8,6 @@ namespace Sakani.Domain.Interfaces
     {
         Task<IReadOnlyList<WishListApartment>> GetByTenantIdAsync(int tenantId);
         Task<bool> ExistsAsync(int tenantId, int apartmentId);
+        Task<WishListApartment?> GetEntryAsync(int tenantId, int apartmentId);
     }
 }

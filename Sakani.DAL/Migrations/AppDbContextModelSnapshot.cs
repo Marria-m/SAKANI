@@ -253,14 +253,9 @@ namespace Sakani.DAL.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("WishListApartmentId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
-
-                    b.HasIndex("WishListApartmentId");
 
                     b.ToTable("Apartments", (string)null);
                 });
@@ -886,7 +881,7 @@ namespace Sakani.DAL.Migrations
                     b.ToTable("UserOtps", (string)null);
                 });
 
-            modelBuilder.Entity("Sakani.Domain.Entities.WishListApartment", b =>
+            modelBuilder.Entity("Sakani.Domain.Entities.WishList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -908,8 +903,37 @@ namespace Sakani.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId")
-                        .IsUnique();
+                    b.ToTable("WishLists", (string)null);
+                });
+
+            modelBuilder.Entity("Sakani.Domain.Entities.WishListApartment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApartmentId");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("WishListApartments", (string)null);
                 });
@@ -973,7 +997,7 @@ namespace Sakani.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("WishListApartmentId")
+                    b.Property<int?>("WishListId")
                         .HasColumnType("int");
 
                     b.ToTable("Tenants", (string)null);
@@ -1049,14 +1073,7 @@ namespace Sakani.DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Sakani.Domain.Entities.WishListApartment", "WishListApartment")
-                        .WithMany("Apartments")
-                        .HasForeignKey("WishListApartmentId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("Owner");
-
-                    b.Navigation("WishListApartment");
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.ApartmentMedia", b =>
@@ -1215,13 +1232,39 @@ namespace Sakani.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sakani.Domain.Entities.WishListApartment", b =>
+            modelBuilder.Entity("Sakani.Domain.Entities.WishList", b =>
                 {
                     b.HasOne("Sakani.Domain.Entities.Tenant", "Tenant")
-                        .WithOne("WishListApartment")
-                        .HasForeignKey("Sakani.Domain.Entities.WishListApartment", "TenantId")
+                        .WithOne("WishList")
+                        .HasForeignKey("Sakani.Domain.Entities.WishList", "TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Sakani.Domain.Entities.WishListApartment", b =>
+                {
+                    b.HasOne("Sakani.Domain.Entities.Apartment", "Apartment")
+                        .WithMany("WishListApartments")
+                        .HasForeignKey("ApartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sakani.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sakani.Domain.Entities.WishList", null)
+                        .WithMany("WishListApartments")
+                        .HasForeignKey("TenantId")
+                        .HasPrincipalKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Apartment");
 
                     b.Navigation("Tenant");
                 });
@@ -1258,6 +1301,8 @@ namespace Sakani.DAL.Migrations
                     b.Navigation("Amenities");
 
                     b.Navigation("Media");
+
+                    b.Navigation("WishListApartments");
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.ApplicationUser", b =>
@@ -1297,9 +1342,9 @@ namespace Sakani.DAL.Migrations
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("Sakani.Domain.Entities.WishListApartment", b =>
+            modelBuilder.Entity("Sakani.Domain.Entities.WishList", b =>
                 {
-                    b.Navigation("Apartments");
+                    b.Navigation("WishListApartments");
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.Admin", b =>
@@ -1322,7 +1367,7 @@ namespace Sakani.DAL.Migrations
 
                     b.Navigation("PropertyIssues");
 
-                    b.Navigation("WishListApartment");
+                    b.Navigation("WishList");
                 });
 #pragma warning restore 612, 618
         }

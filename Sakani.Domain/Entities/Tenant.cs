@@ -18,13 +18,13 @@ namespace Sakani.Domain.Entities
         public double Budget { get; set; } 
         public Gender Gender { get; set; }
         public TenantRoles Roles { get; set; }
+        #endregion
 
         // Navigation Properties
-        public int? WishListApartmentId { get; set; }
-        public WishListApartment? WishListApartment { get; set; }
+        public int? WishListId { get; set; }
+        public WishList? WishList { get; set; }
         public List<PropertyIssue> PropertyIssues { get; set; } 
         public List<ChatRoom> ChatRooms { get; set; } 
         public List<Appointment> Appointments { get; set; } 
-        #endregion
     }
 }

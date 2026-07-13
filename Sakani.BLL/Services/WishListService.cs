@@ -57,7 +57,7 @@ namespace Sakani.BLL.Services
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            apartment.WishListApartmentId = wishList.Id;
+            //apartment.WishListApartmentId = wishList.Id;
             _apartmentRepository.Update(apartment);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -73,12 +73,12 @@ namespace Sakani.BLL.Services
             }
 
             var apartment = await _apartmentRepository.GetByIdAsync(apartmentId);
-            if (apartment == null || apartment.WishListApartmentId != wishList.Id)
-            {
-                return false;
-            }
+            //if (apartment == null || apartment.WishListApartmentId != wishList.Id)
+            //{
+            //    return false;
+            //}
 
-            apartment.WishListApartmentId = null;
+            //apartment.WishListApartmentId = null;
             _apartmentRepository.Update(apartment);
             await _unitOfWork.SaveChangesAsync();
             return true;
