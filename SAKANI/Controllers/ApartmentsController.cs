@@ -120,7 +120,8 @@ namespace SAKANI.Controllers
         // POST /api/apartments/{id}/media
         [HttpPost("{id:int}/media")]
         [Authorize(Roles = "Owner")]
-        public async Task<IActionResult> UploadMedia(int id, IFormFile file)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadMedia(int id, [FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });

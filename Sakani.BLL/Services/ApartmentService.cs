@@ -91,6 +91,17 @@ namespace Sakani.BLL.Services
             apartment.IsDeleted = true;
             _unitOfWork.Repository<Apartment>().Update(apartment);
 
+            // Delete associated media files and database records
+            var mediaList = await _unitOfWork.Repository<ApartmentMedia>().Query()
+                .Where(m => m.ApartmentId == id)
+                .ToListAsync();
+
+            foreach (var media in mediaList)
+            {
+                _fileService.DeleteFile(media.MediaUrl);
+                _unitOfWork.Repository<ApartmentMedia>().Delete(media);
+            }
+
             // Decrement owner's active property count
             var owner = await _unitOfWork.Repository<Owner>().GetByIdAsync(ownerId);
             if (owner != null && owner.TotalActiveProperties > 0)
