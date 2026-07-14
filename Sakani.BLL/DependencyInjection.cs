@@ -50,6 +50,15 @@ namespace Sakani.BLL
             // Apartment Service
             services.AddScoped<IApartmentService, ApartmentService>();
 
+            // Booking Services 
+            services.AddScoped<IBookingManagementService, BookingManagementService>();
+            // Appointment Services 
+            services.AddScoped<IAppointmentManagementService, AppointmentManagementService>();
+            // Tenant View Services 
+            services.AddScoped<ITenantViewService, TenantViewService>();
+            // ID Verification Services 
+            services.AddScoped<IIdVerificationService, IdVerificationService>();
+
             return services;
         }
     }

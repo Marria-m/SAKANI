@@ -200,6 +200,9 @@ namespace Sakani.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ApartmentType")
+                        .HasColumnType("int");
+
                     b.Property<int>("AreaSqm")
                         .HasColumnType("int");
 
@@ -222,7 +225,16 @@ namespace Sakani.DAL.Migrations
                     b.Property<double>("DistanceKm")
                         .HasColumnType("float");
 
+                    b.Property<int>("DistanceMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ElectricityType")
+                        .HasColumnType("int");
+
                     b.Property<int>("Floor")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GasType")
                         .HasColumnType("int");
 
                     b.Property<int>("GenderPolices")
@@ -234,15 +246,33 @@ namespace Sakani.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsElectricityIncluded")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsFurnished")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ListingStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
                     b.Property<int>("MaxCapacity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NearbyServices")
                         .HasColumnType("int");
 
                     b.Property<int>("NoOfRooms")
@@ -252,6 +282,9 @@ namespace Sakani.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<double>("SecurityDeposit")
                         .HasColumnType("float");
 
                     b.Property<int>("Status")
@@ -264,6 +297,9 @@ namespace Sakani.DAL.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ViewsCount")
+                        .HasColumnType("int");
 
                     b.Property<int?>("WishListApartmentId")
                         .HasColumnType("int");
@@ -301,6 +337,10 @@ namespace Sakani.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Tag")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -417,6 +457,9 @@ namespace Sakani.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ApartmentId")
+                        .HasColumnType("int");
+
                     b.Property<DateOnly>("ApplyedAt")
                         .HasColumnType("date");
 
@@ -444,6 +487,8 @@ namespace Sakani.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApartmentId");
 
                     b.HasIndex("TenantId");
 
@@ -1084,11 +1129,19 @@ namespace Sakani.DAL.Migrations
 
             modelBuilder.Entity("Sakani.Domain.Entities.Appointment", b =>
                 {
+                    b.HasOne("Sakani.Domain.Entities.Apartment", "Apartment")
+                        .WithMany("Appointments")
+                        .HasForeignKey("ApartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Sakani.Domain.Entities.Tenant", "Tenant")
                         .WithMany("Appointments")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Apartment");
 
                     b.Navigation("Tenant");
                 });
@@ -1268,6 +1321,8 @@ namespace Sakani.DAL.Migrations
             modelBuilder.Entity("Sakani.Domain.Entities.Apartment", b =>
                 {
                     b.Navigation("Amenities");
+
+                    b.Navigation("Appointments");
 
                     b.Navigation("Media");
                 });
