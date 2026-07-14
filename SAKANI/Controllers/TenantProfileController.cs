@@ -25,7 +25,7 @@ namespace SAKANI.Controllers
                 var ownerId = GetCurrentUserId();
                 var result = await _tenantViewService.GetTenantProfileForOwnerAsync(id, ownerId);
                 if (result == null)
-                    return Forbid("Access denied. You can only view profiles of tenants who have active booking or appointment requests for your properties.");
+                    return StatusCode(403, new { message = "Access denied. You can only view profiles of tenants who have active booking or appointment requests for your properties." });
 
                 return Ok(result);
             }
