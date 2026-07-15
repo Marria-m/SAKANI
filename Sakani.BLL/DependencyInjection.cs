@@ -58,6 +58,8 @@ namespace Sakani.BLL
             services.AddScoped<ITenantViewService, TenantViewService>();
             // ID Verification Services 
             services.AddScoped<IIdVerificationService, IdVerificationService>();
+            // Property Issue Management Services
+            services.AddScoped<IPropertyIssueManagementService, PropertyIssueManagementService>();
 
             return services;
         }
