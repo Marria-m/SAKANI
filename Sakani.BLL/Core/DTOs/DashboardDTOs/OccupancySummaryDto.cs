@@ -9,5 +9,6 @@ namespace Sakani.BLL.Core.DTOs.DashboardDTOs
         public double OccupancyRate { get; set; }
         public string? OccupancyLabel { get; set; }
         public double OverallScore { get; set; }
+        public string? ApartmentImageUrl { get; set; }
     }
 }

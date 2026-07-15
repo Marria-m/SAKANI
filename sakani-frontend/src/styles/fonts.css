@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Readex+Pro:wght@300;400;500;600;700&display=swap');
+
+/* Override Figma-exported font-family names to resolve to real loaded fonts */
+[class*="Cairo:Black"]     { font-family: 'Cairo', sans-serif !important; }
+[class*="Cairo:Bold"]      { font-family: 'Cairo', sans-serif !important; }
+[class*="Cairo:Regular"]   { font-family: 'Cairo', sans-serif !important; }
+[class*="Cairo:SemiBold"]  { font-family: 'Cairo', sans-serif !important; }
+[class*="Readex_Pro:Bold"]     { font-family: 'Readex Pro', sans-serif !important; }
+[class*="Readex_Pro:Medium"]   { font-family: 'Readex Pro', sans-serif !important; }
+[class*="Readex_Pro:Regular"]  { font-family: 'Readex Pro', sans-serif !important; }
+[class*="Readex_Pro:Light"]    { font-family: 'Readex Pro', sans-serif !important; }
+[class*="Readex_Pro:SemiBold"] { font-family: 'Readex Pro', sans-serif !important; }
