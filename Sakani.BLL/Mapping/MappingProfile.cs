@@ -1,6 +1,7 @@
 using AutoMapper;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.DTOs.WishListDTOs;
+using Sakani.BLL.Core.DTOs.TenantDTOs;
 using Sakani.Domain.Entities;
 
 namespace Sakani.BLL.Mapping
@@ -18,6 +19,13 @@ namespace Sakani.BLL.Mapping
             CreateMap<OwnerApartmentRequestDto, Apartment>();
 
             CreateMap<WishListApartment, WishListDto>();
+
+            CreateMap<Tenant, TenantProfileDto>();
+
+            CreateMap<Tenant, UpdateTenantProfileDto>();
+
+            CreateMap<UpdateTenantProfileDto, Tenant>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

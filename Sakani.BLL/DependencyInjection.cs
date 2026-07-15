@@ -42,6 +42,9 @@ namespace Sakani.BLL
             // Wishlist Service
             services.AddScoped<IWishListService, WishListService>();
 
+            // Tenant Service
+            services.AddScoped<ITenantService, TenantService>();
+
             return services;
         }
     }
