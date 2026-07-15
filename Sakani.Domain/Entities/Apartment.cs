@@ -47,5 +47,6 @@ namespace Sakani.Domain.Entities
         public List<ApartmentMedia> Media { get; set; } 
         public List<Amenities> Amenities { get; set; } 
         public List<Appointment> Appointments { get; set; }
+        public List<PropertyIssue> PropertyIssues { get; set; }
     }
 }

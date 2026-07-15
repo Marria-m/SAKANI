@@ -52,12 +52,18 @@ namespace Sakani.BLL
 
             // Booking Services 
             services.AddScoped<IBookingManagementService, BookingManagementService>();
+            
             // Appointment Services 
             services.AddScoped<IAppointmentManagementService, AppointmentManagementService>();
+            
             // Tenant View Services 
             services.AddScoped<ITenantViewService, TenantViewService>();
+            
             // ID Verification Services 
             services.AddScoped<IIdVerificationService, IdVerificationService>();
+            
+            // Property Issue Management Services
+            services.AddScoped<IPropertyIssueManagementService, PropertyIssueManagementService>();
 
             return services;
         }

@@ -16,8 +16,18 @@ namespace Sakani.Domain.Entities
         public IssuePriority Priority { get; set; }
         public DateTime ReportedAt { get; set; }
         public bool IsSeen { get; set; }
+        
+        public string? OwnerResponse { get; set; }
+        
+        // AI Classification Results
+        public string? AiCategory { get; set; }
+        public string? AiSeverity { get; set; }
+        public string? AiSuggestedAction { get; set; }
 
         // Navigation Properties
+        public int ApartmentId { get; set; }
+        public Apartment Apartment { get; set; }
+        
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
         public List<IssueMedia> Media { get; set; } 
