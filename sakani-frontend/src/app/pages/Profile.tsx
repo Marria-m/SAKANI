@@ -78,7 +78,7 @@ function InputField({
 }
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -128,6 +128,7 @@ export default function Profile() {
         phoneNumber: phone,
       });
 
+      updateUser({ fullName: `${firstName} ${lastName}`.trim() });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err: any) {
@@ -147,6 +148,7 @@ export default function Profile() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setProfileImgUrl(res.data.profileImageUrl);
+      updateUser({ profileImageUrl: res.data.profileImageUrl });
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || "فشل رفع الصورة الشخصية");

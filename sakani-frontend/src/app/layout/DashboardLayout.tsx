@@ -8,6 +8,13 @@ import ownerPhoto from "@/imports/لوحةتحكمالمالك/ff14c0cd59cb1218e
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";
 
+const getImageUrl = (url?: string) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:5125/api").replace("/api", "");
+  return `${base}/${url.replace(/^\/+/, "")}`;
+};
+
 interface Props {
   children: React.ReactNode;
   title?: string;
@@ -21,6 +28,7 @@ export default function DashboardLayout({ children, title, subtitle }: Props) {
 
   const ownerName = user?.fullName || "أحمد العمودي";
   const ownerRole = "مالك عقار مميز";
+  const avatarUrl = user?.profileImageUrl ? getImageUrl(user.profileImageUrl) : ownerPhoto;
 
   return (
     <div
@@ -51,7 +59,7 @@ export default function DashboardLayout({ children, title, subtitle }: Props) {
                 <p className="text-[#001d28] font-bold text-sm" style={{ fontFamily: F }}>{ownerName}</p>
                 <p className="text-[#94a3b8] text-xs" style={{ fontFamily: F }}>{ownerRole}</p>
               </div>
-              <img src={ownerPhoto} alt={ownerName} className="w-10 h-10 rounded-full object-cover" />
+              <img src={avatarUrl || ownerPhoto} alt={ownerName} className="w-10 h-10 rounded-full object-cover" />
             </div>
           </div>
 

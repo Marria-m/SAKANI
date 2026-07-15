@@ -109,7 +109,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
       {/* Bottom links */}
       <div className="px-3 pb-6 flex flex-col gap-1 border-t border-white/10 pt-3 mt-1">
         <button
-          onClick={() => alert("سكني - الدعم والمساعدة:\n\nلأي استفسارات أو دعم فني يرجى التواصل معنا عبر البريد الإلكتروني: support@sakani.com\nأو الاتصال على الرقم الموحد: 920001234")}
+          onClick={() => navigate("/help")}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-right w-full cursor-pointer border-none bg-transparent"
           style={{ color: "rgba(203,213,225,0.5)", fontFamily: F, fontSize: 14 }}
         >

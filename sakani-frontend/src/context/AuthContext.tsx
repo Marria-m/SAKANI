@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface User {
   fullName: string;
@@ -7,12 +7,14 @@ interface User {
   refreshToken: string;
   expireOn: string;
   role?: string;
+  profileImageUrl?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
+  updateUser: (updatedFields: Partial<User>) => void;
   isAuthenticated: boolean;
   isOwner: boolean;
 }
@@ -20,19 +22,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Restore user from localStorage on mount
+  const [user, setUser] = useState<User | null>(() => {
+    // Restore user from localStorage synchronously on mount
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        return JSON.parse(storedUser);
       } catch {
         localStorage.removeItem('user');
       }
     }
-  }, []);
+    return null;
+  });
 
   const login = (userData: User) => {
     setUser(userData);
@@ -46,6 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+  };
+
+  const updateUser = (updatedFields: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newUserData = { ...prev, ...updatedFields };
+      localStorage.setItem('user', JSON.stringify(newUserData));
+      return newUserData;
+    });
   };
 
   // Decode JWT to get role (simple base64 decode)
@@ -65,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user?.token,
         isOwner: getRole() === 'Owner',
       }}

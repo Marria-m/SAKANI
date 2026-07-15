@@ -25,6 +25,21 @@ export default function AccountChoice() {
     try {
       const response = await api.post("/Auth/login", { email, password });
       const userData = response.data;
+      
+      // Temporary token storage to authenticate subsequent profile fetch
+      localStorage.setItem("accessToken", userData.token);
+      
+      try {
+        const profileRes = await api.get("/owner/profile", {
+          headers: { Authorization: `Bearer ${userData.token}` }
+        });
+        if (profileRes.data && profileRes.data.profileImageUrl) {
+          userData.profileImageUrl = profileRes.data.profileImageUrl;
+        }
+      } catch (profileErr) {
+        console.error("Failed to pre-fetch owner profile image", profileErr);
+      }
+
       login(userData);
       navigate("/dashboard");
     } catch (err: any) {
