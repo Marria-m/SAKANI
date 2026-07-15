@@ -1,0 +1,43 @@
+using Microsoft.EntityFrameworkCore;
+using Sakani.DAL.Data.Context;
+using Sakani.Domain.Entities;
+using Sakani.Domain.Enums;
+using Sakani.Domain.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Sakani.DAL.Repositories
+{
+    public class TenantBookingRepository : GenericRepository<Booking>, ITenantBookingRepository
+    {
+        public TenantBookingRepository(AppDbContext context) : base(context) { }
+
+        public async Task<bool> HasActiveBookingRequestAsync(int tenantId, int apartmentId)
+        {
+            return await _dbSet.AnyAsync(b => b.Appointment.TenantId == tenantId &&
+                                              b.Appointment.ApartmentId == apartmentId &&
+                                              (b.Status == BookingStatus.UPCOMING || b.Status == BookingStatus.ACTIVE));
+        }
+
+        public async Task<IReadOnlyList<Booking>> GetByTenantIdAsync(int tenantId)
+        {
+            return await _dbSet
+                .Include(b => b.Appointment)
+                    .ThenInclude(a => a.Apartment)
+                .Where(b => b.Appointment.TenantId == tenantId)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Booking>> GetPendingBookingsForApartmentAsync(int apartmentId)
+        {
+            return await _dbSet
+                .Include(b => b.Appointment)
+                    .ThenInclude(a => a.Tenant)
+                .Where(b => b.Appointment.ApartmentId == apartmentId && b.Status == BookingStatus.UPCOMING)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+        }
+    }
+}
