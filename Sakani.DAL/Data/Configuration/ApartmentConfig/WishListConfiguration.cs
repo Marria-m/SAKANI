@@ -16,12 +16,6 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
                 .HasForeignKey<WishList>(w => w.TenantId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // One-to-Many relationship from WishList to WishListApartments (using TenantId as principal key)
-            builder.HasMany(w => w.WishListApartments)
-                .WithOne()
-                .HasForeignKey(wa => wa.TenantId)
-                .HasPrincipalKey(w => w.TenantId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

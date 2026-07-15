@@ -8,8 +8,8 @@ namespace Sakani.Domain.Entities
 {
     public class WishListApartment : BaseEntity
     {
-        public int TenantId { get; set; }
-        public Tenant Tenant { get; set; }
+        public int WishlistId { get; set; }
+        public WishList Wishlist { get; set; }
         public int ApartmentId { get; set; }
         public Apartment Apartment { get; set; }
     }

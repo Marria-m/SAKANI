@@ -40,7 +40,7 @@ namespace Sakani.BLL
             services.AddScoped<IApartmentService, ApartmentService>();
 
             // Wishlist Service
-            //services.AddScoped<IWishListService, WishListService>();
+            services.AddScoped<IWishListService, WishListService>();
 
             return services;
         }

@@ -26,6 +26,7 @@ namespace Sakani.DAL
             services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserOtpRepository, UserOtpRepository>();
             services.AddScoped<IApartmentRepository, ApartmentRepository>();
+            services.AddScoped<IWishListRepository, WishListRepository>();
 
             // Unit of Work
             services.AddScoped<IUnitOfWork, UoW>();

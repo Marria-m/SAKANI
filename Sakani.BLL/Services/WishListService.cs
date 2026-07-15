@@ -1,4 +1,5 @@
 using AutoMapper;
+using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.DTOs.WishListDTOs;
 using Sakani.BLL.Core.Interfaces;
 using Sakani.Domain.Entities;
@@ -9,84 +10,118 @@ using System.Threading.Tasks;
 
 namespace Sakani.BLL.Services
 {
-    public class WishListService : IWishListService
+    public class WishListService(IWishListRepository wishListRepository,
+                                 IUnitOfWork unitOfWork,
+                                 IApartmentRepository apartmentRepository,
+                                 IRepository<WishList> wishListGenericRepository,
+                                 IRepository<Tenant> tenantGenericRepository,
+                                 IMapper mapper) : IWishListService
     {
-        private readonly IWishListRepository _wishListRepository;
-        private readonly IApartmentRepository _apartmentRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-
-        public WishListService(
-            IWishListRepository wishListRepository,
-            IApartmentRepository apartmentRepository,
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public async Task<(bool IsSuccess, string? ErrorMessage)> AddApartmentToWishListAsync(int tenantId, int apartmentId)
         {
-            _wishListRepository = wishListRepository;
-            _apartmentRepository = apartmentRepository;
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            var apartment = await apartmentRepository.GetByIdAsync(apartmentId);
+            if (apartment is null)
+            {
+                return (false, $"Apartment with ID {apartmentId} not found");
+            }
+
+            var tenant = await tenantGenericRepository.GetByIdAsync(tenantId);
+            if (tenant is null)
+            {
+                return (false, $"Tenant with ID {tenantId} not found");
+            }
+
+            var wishList = await wishListGenericRepository.FindAsync(w => w.TenantId == tenantId);
+            if (wishList is null)
+            {
+                wishList = new WishList { TenantId = tenantId };
+                await wishListGenericRepository.AddAsync(wishList);
+            }
+            else
+            {
+                var existingItems = await wishListRepository.GetByTenantIdAsync(tenantId);
+                if (existingItems.Any(wa => wa.ApartmentId == apartmentId))
+                {
+                    return (false, $"Apartment with ID {apartmentId} is already in the wish list");
+                }
+            }
+
+            var wishListApartment = new WishListApartment
+            {
+                WishlistId = wishList.Id,
+                ApartmentId = apartmentId
+            };
+            await wishListRepository.AddAsync(wishListApartment);
+            await unitOfWork.SaveChangesAsync();
+
+            return (true, null);
         }
 
         public async Task<WishListDto?> GetByTenantIdAsync(int tenantId)
         {
-            var wishLists = await _wishListRepository.GetByTenantIdAsync(tenantId);
-            var wishList = wishLists.FirstOrDefault();
-            if (wishList == null)
+            var wishList = await wishListGenericRepository.FindAsync(w => w.TenantId == tenantId);
+            if (wishList is null)
             {
-                return null;
+                return null ; 
             }
 
-            return _mapper.Map<WishListDto>(wishList);
+            var wishListApartments = await wishListRepository.GetByTenantIdAsync(tenantId);
+            
+            var dto = new WishListDto
+            {
+                Id = wishList.Id,
+                TenantId = tenantId,
+                Apartments = mapper.Map<List<TenantApartmentDto>>(wishListApartments.Select(wa => wa.Apartment).ToList())
+            };
+
+            return dto;
         }
 
-        public async Task<bool> AddApartmentToWishListAsync(int tenantId, int apartmentId)
+        public async Task<(bool IsSuccess, string? ErrorMessage)> IsApartmentInWishListAsync(int tenantId, int apartmentId)
         {
-            var apartment = await _apartmentRepository.GetByIdAsync(apartmentId);
-            if (apartment == null)
-            {
-                return false;
-            }
-
-            var wishLists = await _wishListRepository.GetByTenantIdAsync(tenantId);
-            var wishList = wishLists.FirstOrDefault();
-            if (wishList == null)
-            {
-                wishList = new WishListApartment { TenantId = tenantId };
-                await _wishListRepository.AddAsync(wishList);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            //apartment.WishListApartmentId = wishList.Id;
-            _apartmentRepository.Update(apartment);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            var result = await wishListRepository.ExistsAsync(tenantId, apartmentId);
+            return (result.IsSuccess, result.Message);
         }
 
-        public async Task<bool> RemoveApartmentFromWishListAsync(int tenantId, int apartmentId)
+        public async Task<(bool IsSuccess, string? ErrorMessage)> RemoveApartmentFromWishListAsync(int tenantId, int apartmentId)
         {
-            var wishLists = await _wishListRepository.GetByTenantIdAsync(tenantId);
-            var wishList = wishLists.FirstOrDefault();
-            if (wishList == null)
+            var tenantExists = await tenantGenericRepository.GetByIdAsync(tenantId);
+            if (tenantExists is null)
             {
-                return false;
+                return (false, $"Tenant with ID {tenantId} not found");
             }
 
-            var apartment = await _apartmentRepository.GetByIdAsync(apartmentId);
-            //if (apartment == null || apartment.WishListApartmentId != wishList.Id)
-            //{
-            //    return false;
-            //}
+            var result = await wishListRepository.RemoveApartmentFromWishListAsync(tenantId, apartmentId);
+            if (!result.IsSuccess)
+            {
+                return (false, result.Message);
+            }
 
-            //apartment.WishListApartmentId = null;
-            _apartmentRepository.Update(apartment);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            await unitOfWork.SaveChangesAsync();
+            return (true, null);
         }
 
-        public async Task<bool> IsApartmentInWishListAsync(int tenantId, int apartmentId)
+        public async Task<(bool IsSuccess, string? ErrorMessage)> ClearWishListAsync(int tenantId)
         {
-            return await _wishListRepository.ExistsAsync(tenantId, apartmentId);
+            var tenantExists = await tenantGenericRepository.GetByIdAsync(tenantId);
+            if (tenantExists is null)
+            {
+                return (false, $"Tenant with ID {tenantId} not found");
+            }
+
+            var wishListApartments = await wishListRepository.GetByTenantIdAsync(tenantId);
+            if (!wishListApartments.Any())
+            {
+                return (true, null);
+            }
+
+            foreach (var item in wishListApartments)
+            {
+                wishListRepository.Delete(item);
+            }
+
+            await unitOfWork.SaveChangesAsync();
+            return (true, null);
         }
     }
 }

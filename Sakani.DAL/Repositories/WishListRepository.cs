@@ -9,19 +9,19 @@ namespace Sakani.DAL.Repositories
     {
         public WishListRepository(AppDbContext context) : base(context) { }
 
-        public  async Task<(bool IsSuccess, string Message)> ExistsAsync(int tenantId, int apartmentId)
+        public  async Task<(bool IsSuccess, string Message)> ExistsAsync(int wishlistId, int apartmentId)
         {
-            var target = await _context.WishListApartments.AnyAsync(w => w.TenantId == tenantId && w.ApartmentId == apartmentId);
+            var target = await _context.WishListApartments.AnyAsync(w => w.WishlistId == wishlistId && w.ApartmentId == apartmentId);
             if (!target) 
-                return (false, $"Apartment ID {apartmentId} was not found in Tenant ID {tenantId}'s wishlist.");
+                return (false, $"Apartment ID {apartmentId} was not found in Wishlist ID {wishlistId}.");
 
-            return (true, $"Apartment ID {apartmentId} exists in Tenant ID {tenantId}'s wishlist.");
+            return (true, $"Apartment ID {apartmentId} exists in Wishlist ID {wishlistId}.");
         }
 
         public async Task<IReadOnlyList<WishListApartment>> GetByTenantIdAsync(int tenantId)
         {
             return await _context.WishListApartments
-                .Where(w => w.TenantId == tenantId)
+                .Where(w => w.Wishlist.TenantId == tenantId)
                 .AsNoTracking()
                 .Include(w => w.Apartment)
                 .ToListAsync();
@@ -29,7 +29,7 @@ namespace Sakani.DAL.Repositories
 
         public async Task<(bool IsSuccess, string Message)> RemoveApartmentFromWishListAsync(int tenantId, int apartmentId)
         {
-            var target = await _context.WishListApartments.FirstOrDefaultAsync(w => w.TenantId == tenantId && w.ApartmentId == apartmentId);
+            var target = await _context.WishListApartments.FirstOrDefaultAsync(w => w.Wishlist.TenantId == tenantId && w.ApartmentId == apartmentId);
             if(target is null)
                 return (false, $"Apartment ID {apartmentId} was not found in Tenant ID {tenantId}'s wishlist.");
             

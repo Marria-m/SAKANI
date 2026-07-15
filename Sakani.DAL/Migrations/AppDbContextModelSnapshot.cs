@@ -903,6 +903,9 @@ namespace Sakani.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
                     b.ToTable("WishLists", (string)null);
                 });
 
@@ -923,17 +926,17 @@ namespace Sakani.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("WishlistId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApartmentId");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("WishlistId");
 
                     b.ToTable("WishListApartments", (string)null);
                 });
@@ -1248,25 +1251,18 @@ namespace Sakani.DAL.Migrations
                     b.HasOne("Sakani.Domain.Entities.Apartment", "Apartment")
                         .WithMany("WishListApartments")
                         .HasForeignKey("ApartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Sakani.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Sakani.Domain.Entities.WishList", null)
+                    b.HasOne("Sakani.Domain.Entities.WishList", "Wishlist")
                         .WithMany("WishListApartments")
-                        .HasForeignKey("TenantId")
-                        .HasPrincipalKey("TenantId")
+                        .HasForeignKey("WishlistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Apartment");
 
-                    b.Navigation("Tenant");
+                    b.Navigation("Wishlist");
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.Admin", b =>
