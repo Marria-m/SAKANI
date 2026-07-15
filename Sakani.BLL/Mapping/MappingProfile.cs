@@ -2,6 +2,7 @@ using AutoMapper;
 using Sakani.BLL.Core.DTOs.AppointmentDTOs;
 using Sakani.BLL.Core.DTOs.BookingDTOs;
 using Sakani.BLL.Core.DTOs.TenantDTOs;
+using Sakani.BLL.Core.DTOs.IssueDTOs;
 using Sakani.Domain.Entities;
 
 namespace Sakani.BLL.Mapping
@@ -25,6 +26,14 @@ namespace Sakani.BLL.Mapping
 
             CreateMap<Tenant, TenantProfileDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}".Trim()));
+
+            CreateMap<IssueMedia, IssueMediaDto>();
+
+            CreateMap<PropertyIssue, IssueResponseDto>()
+                .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant != null ? $"{src.Tenant.FirstName} {src.Tenant.LastName}".Trim() : string.Empty))
+                .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.Email : string.Empty))
+                .ForMember(dest => dest.TenantPhone, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.PhoneNumber : string.Empty))
+                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Title : string.Empty));
         }
     }
 }
