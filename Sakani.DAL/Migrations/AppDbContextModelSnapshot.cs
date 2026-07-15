@@ -400,6 +400,9 @@ namespace Sakani.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ApartmentId")
+                        .HasColumnType("int");
+
                     b.Property<DateOnly>("ApplyedAt")
                         .HasColumnType("date");
 
@@ -427,6 +430,8 @@ namespace Sakani.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApartmentId");
 
                     b.HasIndex("TenantId");
 
@@ -1092,11 +1097,19 @@ namespace Sakani.DAL.Migrations
 
             modelBuilder.Entity("Sakani.Domain.Entities.Appointment", b =>
                 {
+                    b.HasOne("Sakani.Domain.Entities.Apartment", "Apartment")
+                        .WithMany()
+                        .HasForeignKey("ApartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Sakani.Domain.Entities.Tenant", "Tenant")
                         .WithMany("Appointments")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Apartment");
 
                     b.Navigation("Tenant");
                 });

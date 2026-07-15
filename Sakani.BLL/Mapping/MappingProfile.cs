@@ -2,6 +2,7 @@ using AutoMapper;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.DTOs.WishListDTOs;
 using Sakani.BLL.Core.DTOs.TenantDTOs;
+using Sakani.BLL.Core.DTOs.BookingDTOs;
 using Sakani.Domain.Entities;
 
 namespace Sakani.BLL.Mapping
@@ -26,6 +27,15 @@ namespace Sakani.BLL.Mapping
 
             CreateMap<UpdateTenantProfileDto, Tenant>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<CreateAppointmentDto, Appointment>();
+
+            CreateMap<Appointment, AppointmentResponseDto>()
+                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Title : string.Empty))
+                .ForMember(dest => dest.ApartmentLocation, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Location : string.Empty))
+                .ForMember(dest => dest.ApartmentCity, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.City : string.Empty))
+                .ForMember(dest => dest.ApartmentPrice, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Price : 0))
+                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Apartment != null && src.Apartment.Owner != null ? $"{src.Apartment.Owner.FirstName} {src.Apartment.Owner.LastName}".Trim() : string.Empty));
         }
     }
 }
