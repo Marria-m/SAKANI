@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoMapper;
 using Sakani.BLL.Core.DTOs.AppointmentDTOs;
 using Sakani.BLL.Core.DTOs.BookingDTOs;
@@ -16,7 +17,10 @@ namespace Sakani.BLL.Mapping
                 .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.Email : string.Empty))
                 .ForMember(dest => dest.TenantPhone, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.PhoneNumber : string.Empty))
                 .ForMember(dest => dest.ApartmentId, opt => opt.MapFrom(src => src.Appointment != null ? src.Appointment.ApartmentId : 0))
-                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null ? src.Appointment.Apartment.Title : string.Empty));
+                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null ? src.Appointment.Apartment.Title : string.Empty))
+                .ForMember(dest => dest.TenantId, opt => opt.MapFrom(src => src.Appointment != null ? src.Appointment.TenantId : 0))
+                .ForMember(dest => dest.ApartmentImageUrl, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null && src.Appointment.Apartment.Media != null && src.Appointment.Apartment.Media.Any() ? src.Appointment.Apartment.Media.First().MediaUrl : null))
+                .ForMember(dest => dest.TenantProfileImageUrl, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.ProfileImageUrl : null));
 
             CreateMap<Appointment, AppointmentResponseDto>()
                 .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant != null ? $"{src.Tenant.FirstName} {src.Tenant.LastName}" : string.Empty))

@@ -33,6 +33,7 @@ namespace Sakani.BLL.Services
 
             // 2. Get active apartments
             var apartments = await _unitOfWork.Repository<Apartment>().Query()
+                .Include(a => a.Media)
                 .Where(a => a.OwnerId == ownerId && !a.IsDeleted)
                 .ToListAsync();
 
@@ -102,7 +103,8 @@ namespace Sakani.BLL.Services
                     CurrentOccupied = apartment.CurrentOccupied,
                     OccupancyRate = insightsResult.OccupancyRate,
                     OccupancyLabel = insightsResult.OccupancyLabel,
-                    OverallScore = insightsResult.OverallScore
+                    OverallScore = insightsResult.OverallScore,
+                    ApartmentImageUrl = apartment.Media != null && apartment.Media.Any() ? apartment.Media.First().MediaUrl : null
                 });
 
                 pricingList.Add(new PriceComparisonDto
