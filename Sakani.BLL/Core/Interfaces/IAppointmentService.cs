@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Sakani.BLL.Core.Interfaces
 {
-    public interface ITenantBookingService
+    public interface IAppointmentService
     {
         Task<AppointmentResponseDto> RequestAppointmentAsync(int tenantId, CreateAppointmentDto dto);
         Task<bool> CancelRequestAsync(int tenantId, int appointmentId);

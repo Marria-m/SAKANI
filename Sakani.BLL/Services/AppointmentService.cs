@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Sakani.BLL.Services
 {
-    public class TenantBookingService : ITenantBookingService
+    public class AppointmentService : IAppointmentService
     {
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IApartmentRepository _apartmentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public TenantBookingService(
+        public AppointmentService(
             IAppointmentRepository appointmentRepository,
             IApartmentRepository apartmentRepository,
             IUnitOfWork unitOfWork,
