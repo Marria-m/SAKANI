@@ -65,6 +65,9 @@ namespace Sakani.BLL
             // Property Issue Management Services
             services.AddScoped<IPropertyIssueManagementService, PropertyIssueManagementService>();
 
+            // Dashboard Services
+            services.AddScoped<IDashboardService, DashboardService>();
+
             return services;
         }
     }
