@@ -90,7 +90,7 @@ namespace Sakani.BLL.Services
             if (isUpdated)
             {
                 _unitOfWork.Repository<PropertyIssue>().Update(issue);
-                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             return _mapper.Map<IssueResponseDto>(issue);
@@ -111,7 +111,7 @@ namespace Sakani.BLL.Services
             issue.UpdatedAt = System.DateTime.UtcNow;
 
             _unitOfWork.Repository<PropertyIssue>().Update(issue);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<IssueResponseDto>(issue);
         }
