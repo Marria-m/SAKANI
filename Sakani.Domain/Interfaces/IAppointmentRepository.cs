@@ -9,5 +9,6 @@ namespace Sakani.Domain.Interfaces
         Task<Appointment?> GetActiveAppointmentAsync(int tenantId, int apartmentId);
         Task<Appointment?> GetApprovedAppointmentAsync(int tenantId, int apartmentId);
         Task<IReadOnlyList<Appointment>> GetByTenantIdAsync(int tenantId);
+        Task<Appointment?> GetByIdWithDetailsAsync(int id);
     }
 }
