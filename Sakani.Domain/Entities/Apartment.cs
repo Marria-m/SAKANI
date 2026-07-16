@@ -21,6 +21,22 @@ namespace Sakani.Domain.Entities
         public bool IsBarginAllowed { get; set; } 
         public AppartmentStatus Status { get; set; }
         public GenderPolices GenderPolices { get; set; }
+        public double DistanceKm { get; set; }
+        public int Floor { get; set; }
+        public int AreaSqm { get; set; }
+        public bool IsFurnished { get; set; }
+        public ApartmentType? ApartmentType { get; set; }
+        public double SecurityDeposit { get; set; }
+        public ElectricityType? ElectricityType { get; set; }
+        public bool IsElectricityIncluded { get; set; }
+        public GasType? GasType { get; set; }
+        public int DistanceMinutes { get; set; }
+        public NearbyServices NearbyServices { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public bool IsVerified { get; set; }
+        public int ViewsCount { get; set; }
+        public PropertyStatus ListingStatus { get; set; } = PropertyStatus.ACTIVE;
         #endregion
 
         // Navigation Properties
@@ -29,5 +45,7 @@ namespace Sakani.Domain.Entities
         public Owner Owner { get; set; }
         public List<ApartmentMedia> Media { get; set; } 
         public List<Amenities> Amenities { get; set; } 
+        public List<Appointment> Appointments { get; set; }
+        public List<PropertyIssue> PropertyIssues { get; set; }
     }
 }

@@ -3,7 +3,10 @@ using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.DTOs.WishListDTOs;
 using Sakani.BLL.Core.DTOs.TenantDTOs;
 using Sakani.BLL.Core.DTOs.BookingDTOs;
+using Sakani.BLL.Core.DTOs.AppointmentDTOs;
+using Sakani.BLL.Core.DTOs.IssueDTOs;
 using Sakani.Domain.Entities;
+using System.Linq;
 
 namespace Sakani.BLL.Mapping
 {
@@ -21,7 +24,8 @@ namespace Sakani.BLL.Mapping
 
             CreateMap<WishListApartment, WishListDto>();
 
-            CreateMap<Tenant, TenantProfileDto>();
+            CreateMap<Tenant, TenantProfileDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}".Trim()));
 
             CreateMap<Tenant, UpdateTenantProfileDto>();
 
@@ -30,12 +34,20 @@ namespace Sakani.BLL.Mapping
 
             CreateMap<CreateAppointmentDto, Appointment>();
 
-            CreateMap<Appointment, AppointmentResponseDto>()
+            // Tenant-facing AppointmentResponseDto
+            CreateMap<Appointment, Sakani.BLL.Core.DTOs.BookingDTOs.AppointmentResponseDto>()
                 .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Title : string.Empty))
                 .ForMember(dest => dest.ApartmentLocation, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Location : string.Empty))
                 .ForMember(dest => dest.ApartmentCity, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.City : string.Empty))
                 .ForMember(dest => dest.ApartmentPrice, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Price : 0))
                 .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Apartment != null && src.Apartment.Owner != null ? $"{src.Apartment.Owner.FirstName} {src.Apartment.Owner.LastName}".Trim() : string.Empty));
+
+            // Owner-facing AppointmentResponseDto
+            CreateMap<Appointment, Sakani.BLL.Core.DTOs.AppointmentDTOs.AppointmentResponseDto>()
+                .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant != null ? $"{src.Tenant.FirstName} {src.Tenant.LastName}" : string.Empty))
+                .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.Email : string.Empty))
+                .ForMember(dest => dest.TenantPhone, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.PhoneNumber : string.Empty))
+                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Title : string.Empty));
 
             CreateMap<CreateBookingRequestDto, Booking>();
 
@@ -45,7 +57,18 @@ namespace Sakani.BLL.Mapping
                 .ForMember(dest => dest.ApartmentLocation, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null ? src.Appointment.Apartment.Location : string.Empty))
                 .ForMember(dest => dest.ApartmentCity, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null ? src.Appointment.Apartment.City : string.Empty))
                 .ForMember(dest => dest.ApartmentPrice, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null ? src.Appointment.Apartment.Price : 0))
-                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null && src.Appointment.Apartment.Owner != null ? $"{src.Appointment.Apartment.Owner.FirstName} {src.Appointment.Apartment.Owner.LastName}".Trim() : string.Empty));
+                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Apartment != null && src.Appointment.Apartment.Owner != null ? $"{src.Appointment.Apartment.Owner.FirstName} {src.Appointment.Apartment.Owner.LastName}".Trim() : string.Empty))
+                .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? $"{src.Appointment.Tenant.FirstName} {src.Appointment.Tenant.LastName}".Trim() : string.Empty))
+                .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.Email : string.Empty))
+                .ForMember(dest => dest.TenantPhone, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.PhoneNumber : string.Empty));
+
+            CreateMap<IssueMedia, IssueMediaDto>();
+
+            CreateMap<PropertyIssue, IssueResponseDto>()
+                .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant != null ? $"{src.Tenant.FirstName} {src.Tenant.LastName}".Trim() : string.Empty))
+                .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.Email : string.Empty))
+                .ForMember(dest => dest.TenantPhone, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.PhoneNumber : string.Empty))
+                .ForMember(dest => dest.ApartmentTitle, opt => opt.MapFrom(src => src.Apartment != null ? src.Apartment.Title : string.Empty));
         }
     }
 }

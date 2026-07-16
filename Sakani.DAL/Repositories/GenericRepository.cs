@@ -25,6 +25,12 @@ namespace Sakani.DAL.Repositories
         public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.FirstOrDefaultAsync(predicate);
 
+        public async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
+            => await _dbSet.Where(predicate).ToListAsync();
+
+        public IQueryable<T> Query()
+            => _dbSet;
+
         public async Task AddAsync(T entity)
             => await _dbSet.AddAsync(entity);
 

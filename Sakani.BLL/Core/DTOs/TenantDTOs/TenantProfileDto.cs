@@ -10,6 +10,7 @@ namespace Sakani.BLL.Core.DTOs.TenantDTOs
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public string FullName { get; set; } = null!;
         public string? Jop { get; set; }
         public string? Collage { get; set; }
         public string? Major { get; set; }

@@ -1,10 +1,17 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Sakani.BLL.Core.DTOs.AiDTOs;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
+using Sakani.BLL.Core.DTOs.Common;
 using Sakani.BLL.Core.Interfaces;
 using Sakani.Domain.Entities;
+using Sakani.Domain.Enums;
 using Sakani.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,11 +39,6 @@ namespace Sakani.BLL.Services
             IMapper mapper)
         {
             _apartmentRepository = apartmentRepository;
-            _amenitiesRepository = amenitiesRepository;
-            _mediaRepository = mediaRepository;
-            _wishListApartmentRepository = wishListApartmentRepository;
-            _appointmentRepository = appointmentRepository;
-            _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -153,8 +155,7 @@ namespace Sakani.BLL.Services
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
-
-        public Task<(IReadOnlyList<TenantApartmentDto> Items, int TotalCount)> GetFilteredApartmentsAsync(ApartmentFilterDto filterDto)
+        public async Task<(IReadOnlyList<TenantApartmentDto> Items, int TotalCount)> GetFilteredApartmentsAsync(ApartmentFilterDto filterDto)
         {
             throw new NotImplementedException();
         }

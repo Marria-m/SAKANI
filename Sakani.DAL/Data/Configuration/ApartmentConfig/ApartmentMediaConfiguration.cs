@@ -19,6 +19,10 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
             builder.Property(am => am.MediaType)
                 .IsRequired();
 
+            builder.Property(am => am.Tag)
+                .HasMaxLength(100)
+                .IsRequired(false);
+
             // Relationships
             builder.HasOne(am => am.Apartment)
                 .WithMany(a => a.Media)

@@ -10,6 +10,9 @@ namespace Sakani.BLL.Core.DTOs.BookingDTOs
         public string DurationInMonthes { get; set; } = string.Empty;
         public BookingStatus Status { get; set; }
         public int AppointmentId { get; set; }
+        public string TenantName { get; set; }
+        public string TenantEmail { get; set; }
+        public string TenantPhone { get; set; }
         public int ApartmentId { get; set; }
         public string ApartmentTitle { get; set; } = string.Empty;
         public string ApartmentLocation { get; set; } = string.Empty;
