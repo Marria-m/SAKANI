@@ -13,6 +13,7 @@ namespace Sakani.DAL.Repositories
         public async Task<IReadOnlyList<Apartment>> GetByOwnerIdAsync(int ownerId)
         {
             return await _dbSet
+                .Include(a => a.Media)
                 .Where(a => a.OwnerId == ownerId)
                 .ToListAsync();
         }

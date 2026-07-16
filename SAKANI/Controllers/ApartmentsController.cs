@@ -62,6 +62,20 @@ namespace SAKANI.Controllers
         // ==========================================
 
         [Authorize(Roles = "Owner")]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyApartments()
+        {
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal) || !int.TryParse(userIdVal, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var apartments = await _apartmentService.GetByOwnerIdAsync(userId);
+            return Ok(apartments);
+        }
+
+        [Authorize(Roles = "Owner")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OwnerApartmentRequestDto dto)
         {

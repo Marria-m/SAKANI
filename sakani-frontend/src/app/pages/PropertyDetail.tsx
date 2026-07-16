@@ -55,6 +55,8 @@ export default function PropertyDetail() {
   const [bookingDuration, setBookingDuration] = useState("6");
   const [bookingRequestStatus, setBookingRequestStatus] = useState<string | null>(null);
   const [bookingRequestLoading, setBookingRequestLoading] = useState(false);
+  const [myAppointments, setMyAppointments] = useState<any[]>([]);
+  const [myBookings, setMyBookings] = useState<any[]>([]);
 
   const toggleWishlist = async () => {
     try {
@@ -84,6 +86,21 @@ export default function PropertyDetail() {
       setBookingStatus("success");
       setTenantMessage("");
       setAppointmentDate("");
+
+      // Reload appointments
+      const apptsRes = await api.get("/appointments");
+      const propAppts = (apptsRes.data || []).filter(
+        (appt: any) => appt.apartmentId === Number(id)
+      );
+      setMyAppointments(propAppts);
+
+      const approved = propAppts.filter(
+        (appt: any) => appt.appointmentStatus === 2
+      );
+      setApprovedAppointments(approved);
+      if (approved.length > 0) {
+        setSelectedAppointmentId(approved[0].id);
+      }
     } catch (err: any) {
       console.error("Failed to request appointment", err);
       setBookingStatus(err.response?.data?.message || "فشل إرسال طلب المعاينة.");
@@ -108,6 +125,13 @@ export default function PropertyDetail() {
       });
       setBookingRequestStatus("success");
       setBookingStartDate("");
+
+      // Reload bookings
+      const bookingsRes = await api.get("/bookings");
+      const propBookings = (bookingsRes.data || []).filter(
+        (b: any) => b.apartmentId === Number(id)
+      );
+      setMyBookings(propBookings);
     } catch (err: any) {
       console.error("Failed to request booking", err);
       setBookingRequestStatus(err.response?.data?.message || "فشل إرسال طلب الحجز.");
@@ -141,8 +165,13 @@ export default function PropertyDetail() {
 
           try {
             const apptsRes = await api.get("/appointments");
-            const approved = (apptsRes.data || []).filter(
-              (appt: any) => appt.apartmentId === Number(id) && appt.status === 2
+            const propAppts = (apptsRes.data || []).filter(
+              (appt: any) => appt.apartmentId === Number(id)
+            );
+            setMyAppointments(propAppts);
+
+            const approved = propAppts.filter(
+              (appt: any) => appt.appointmentStatus === 2
             );
             setApprovedAppointments(approved);
             if (approved.length > 0) {
@@ -150,6 +179,16 @@ export default function PropertyDetail() {
             }
           } catch (apptErr) {
             console.error("Failed to load approved appointments", apptErr);
+          }
+
+          try {
+            const bookingsRes = await api.get("/bookings");
+            const propBookings = (bookingsRes.data || []).filter(
+              (b: any) => b.apartmentId === Number(id)
+            );
+            setMyBookings(propBookings);
+          } catch (bookErr) {
+            console.error("Failed to load bookings", bookErr);
           }
         }
       } catch (err) {
@@ -415,6 +454,29 @@ export default function PropertyDetail() {
               </div>
             </div>
 
+            {/* Owner Profile Card */}
+            {property.ownerName && (
+              <div
+                className="bg-white rounded-2xl p-5 flex flex-col gap-3 text-right"
+                style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+              >
+                <h4 className="text-[#001d28] font-bold text-sm border-b pb-2 mb-1" style={{ fontFamily: C }}>مالك العقار 👤</h4>
+                <div className="flex items-center gap-3 justify-end">
+                  <div className="text-right flex-1">
+                    <div className="font-bold text-sm text-[#001d28]" style={{ fontFamily: C }}>{property.ownerName}</div>
+                    <div className="text-[10px] text-green-600 font-semibold" style={{ fontFamily: F }}>✓ مالك موثق</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                    {property.ownerProfileImage ? (
+                      <img src={getImageUrl(property.ownerProfileImage) || ""} alt={property.ownerName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[#001d28] font-bold text-lg">{property.ownerName[0]}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             {role === "Tenant" ? (
               <div className="flex flex-col gap-4">
@@ -445,149 +507,235 @@ export default function PropertyDetail() {
                 </button>
 
                 {/* Booking Request Form (Requires Approved Appointment) */}
-                {approvedAppointments.length > 0 ? (
-                  <form
-                    onSubmit={handleRequestBooking}
-                    className="bg-white rounded-2xl p-5 flex flex-col gap-3 text-right"
-                    style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
-                  >
-                    <h4 className="text-[#001d28] font-bold text-sm border-b pb-2 mb-1" style={{ fontFamily: C }}>طلب تأجير السكن 📜</h4>
-                    
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-[#001d28] font-semibold">موعد الزيارة المعتمد</label>
-                      <CustomSelect
-                        value={selectedAppointmentId.toString()}
-                        onChange={(val) => setSelectedAppointmentId(Number(val))}
-                        options={approvedAppointments.map((appt) => ({
-                          value: appt.id.toString(),
-                          label: `معاينة بتاريخ ${appt.appointmentDate}`
-                        }))}
-                        placeholder="موعد الزيارة المعتمد"
-                      />
-                    </div>
+                {(() => {
+                  const pendingB = myBookings.find((b: any) => b.status === 0);
+                  const activeB = myBookings.find((b: any) => b.status === 1 || b.status === 2);
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-[#001d28] font-semibold">تاريخ بدء العقد</label>
-                      <input
-                        type="date"
-                        required
-                        value={bookingStartDate}
-                        min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) => setBookingStartDate(e.target.value)}
-                        className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none cursor-pointer"
-                        style={{ fontFamily: F }}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-[#001d28] font-semibold">مدة الإيجار</label>
-                      <CustomSelect
-                        value={bookingDuration}
-                        onChange={(val) => setBookingDuration(val)}
-                        options={[
-                          { value: "3", label: "3 أشهر" },
-                          { value: "6", label: "6 أشهر" },
-                          { value: "12", label: "12 شهر (سنة)" }
-                        ]}
-                        placeholder="مدة الإيجار"
-                      />
-                    </div>
-
-                    {bookingRequestStatus && (
+                  if (activeB) {
+                    return (
                       <div
-                        className={`p-3 rounded-xl text-[10px] text-right font-bold ${
-                          bookingRequestStatus === "success"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-600"
-                        }`}
+                        className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-5 text-right flex flex-col gap-2"
+                        style={{ fontFamily: F, boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                      >
+                        <h4 className="text-emerald-800 font-bold text-sm border-b border-emerald-100 pb-2 mb-1" style={{ fontFamily: C }}>
+                          طلب الحجز مقبول ✓
+                        </h4>
+                        <p className="text-xs text-emerald-950/80 leading-relaxed">
+                          تهانينا! تم قبول وتفعيل حجز هذا السكن بنجاح. عقد الإيجار الخاص بك نشط الآن.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  if (pendingB) {
+                    return (
+                      <div
+                        className="bg-amber-50/50 border border-amber-200 rounded-2xl p-5 text-right flex flex-col gap-2"
+                        style={{ fontFamily: F, boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                      >
+                        <h4 className="text-amber-800 font-bold text-sm border-b border-amber-100 pb-2 mb-1" style={{ fontFamily: C }}>
+                          طلب الحجز قيد الانتظار ⏳
+                        </h4>
+                        <p className="text-xs text-amber-950/80 leading-relaxed">
+                          لقد أرسلت بالفعل طلب تأجير لهذا السكن. الرجاء الانتظار حتى يقوم المالك بالموافقة وتفعيل الحجز.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  if (approvedAppointments.length > 0) {
+                    return (
+                      <form
+                        onSubmit={handleRequestBooking}
+                        className="bg-white rounded-2xl p-5 flex flex-col gap-3 text-right"
+                        style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                      >
+                        <h4 className="text-[#001d28] font-bold text-sm border-b pb-2 mb-1" style={{ fontFamily: C }}>طلب تأجير السكن 📜</h4>
+                        
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs text-[#001d28] font-semibold">موعد الزيارة المعتمد</label>
+                          <CustomSelect
+                            value={selectedAppointmentId.toString()}
+                            onChange={(val) => setSelectedAppointmentId(Number(val))}
+                            options={approvedAppointments.map((appt) => ({
+                              value: appt.id.toString(),
+                              label: `معاينة بتاريخ ${appt.appointmentDate}`
+                            }))}
+                            placeholder="موعد الزيارة المعتمد"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs text-[#001d28] font-semibold">تاريخ بدء العقد</label>
+                          <input
+                            type="date"
+                            required
+                            value={bookingStartDate}
+                            min={new Date().toISOString().split("T")[0]}
+                            onChange={(e) => setBookingStartDate(e.target.value)}
+                            className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none cursor-pointer"
+                            style={{ fontFamily: F }}
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs text-[#001d28] font-semibold">مدة الإيجار</label>
+                          <CustomSelect
+                            value={bookingDuration}
+                            onChange={(val) => setBookingDuration(val)}
+                            options={[
+                              { value: "3", label: "3 أشهر" },
+                              { value: "6", label: "6 أشهر" },
+                              { value: "12", label: "12 شهر (سنة)" }
+                            ]}
+                            placeholder="مدة الإيجار"
+                          />
+                        </div>
+
+                        {bookingRequestStatus && (
+                          <div
+                            className={`p-3 rounded-xl text-[10px] text-right font-bold ${
+                              bookingRequestStatus === "success"
+                                ? "bg-green-50 text-green-700"
+                                : "bg-red-50 text-red-600"
+                            }`}
+                            style={{ fontFamily: F }}
+                          >
+                            {bookingRequestStatus === "success"
+                              ? "✓ تم إرسال طلب الحجز بنجاح وبانتظار موافقة المالك!"
+                              : `✕ ${bookingRequestStatus}`}
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={bookingRequestLoading}
+                          className="w-full py-3 rounded-xl font-bold text-white text-xs bg-emerald-600 transition-opacity hover:opacity-90 disabled:opacity-50 border-none cursor-pointer flex items-center justify-center gap-1.5"
+                          style={{ fontFamily: F }}
+                        >
+                          <FileText size={14} />
+                          {bookingRequestLoading ? "جاري الإرسال..." : "إرسال طلب الحجز"}
+                        </button>
+                      </form>
+                    );
+                  }
+
+                  return (
+                    <div
+                      className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 text-right text-amber-800 text-xs flex flex-col gap-2"
+                      style={{ fontFamily: F }}
+                    >
+                      <p className="font-semibold text-amber-900">ملاحظة بشأن طلب الحجز:</p>
+                      <p className="leading-relaxed">
+                        لتقديم طلب تأجير رسمي لهذا السكن، يتطلب أولاً تقديم طلب معاينة بالأسفل والحصول على موافقة معتمدة من مالك العقار.
+                      </p>
+                    </div>
+                  );
+                })()}
+
+                {/* Appointment booking form or status message */}
+                {(() => {
+                  const pendingAppt = myAppointments.find((a: any) => a.appointmentStatus === 0 || a.appointmentStatus === 1);
+                  const approvedAppt = myAppointments.find((a: any) => a.appointmentStatus === 2);
+
+                  if (pendingAppt) {
+                    return (
+                      <div
+                        className="bg-amber-50/50 border border-amber-200 rounded-2xl p-5 text-right flex flex-col gap-2"
+                        style={{ fontFamily: F, boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                      >
+                        <h4 className="text-amber-800 font-bold text-sm border-b border-amber-100 pb-2 mb-1" style={{ fontFamily: C }}>
+                          طلب المعاينة قيد الانتظار ⏳
+                        </h4>
+                        <p className="text-xs text-amber-900/80 leading-relaxed">
+                          لقد أرسلت بالفعل طلب معاينة لهذا السكن بتاريخ <span className="font-bold text-[#001d28]">{pendingAppt.appointmentDate}</span>.
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                          الرجاء انتظار رد المالك ليتم تفعيل خيار الحجز.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  if (approvedAppt) {
+                    return (
+                      <div
+                        className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-5 text-right flex flex-col gap-2"
+                        style={{ fontFamily: F, boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                      >
+                        <h4 className="text-emerald-800 font-bold text-sm border-b border-emerald-100 pb-2 mb-1" style={{ fontFamily: C }}>
+                          تم تأكيد موعد المعاينة ✓
+                        </h4>
+                        <p className="text-xs text-emerald-950/80 leading-relaxed">
+                          موعد المعاينة المعتمد هو: <span className="font-bold text-[#001d28]">{approvedAppt.appointmentDate}</span>.
+                        </p>
+                        <p className="text-[10px] text-emerald-700 font-semibold">
+                          يمكنك الآن تعبئة نموذج طلب الحجز في الأعلى.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <form
+                      onSubmit={handleRequestAppointment}
+                      className="bg-white rounded-2xl p-5 flex flex-col gap-3 text-right"
+                      style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
+                    >
+                      <h4 className="text-[#001d28] font-bold text-sm border-b pb-2 mb-1" style={{ fontFamily: C }}>طلب تحديد موعد معاينة</h4>
+                      
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-[#001d28] font-semibold">تاريخ الزيارة المقترح</label>
+                        <input
+                          type="date"
+                          required
+                          value={appointmentDate}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) => setAppointmentDate(e.target.value)}
+                          className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none cursor-pointer"
+                          style={{ fontFamily: F }}
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs text-[#001d28] font-semibold">رسالة للمالك (اختياري)</label>
+                        <textarea
+                          placeholder="اكتب استفساراتك أو تفاصيل إضافية للمالك..."
+                          value={tenantMessage}
+                          onChange={(e) => setTenantMessage(e.target.value)}
+                          rows={3}
+                          className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none resize-none"
+                          style={{ fontFamily: F }}
+                        />
+                      </div>
+
+                      {bookingStatus && (
+                        <div
+                          className={`p-3 rounded-xl text-[10px] text-right font-bold ${
+                            bookingStatus === "success"
+                              ? "bg-green-50 text-green-700"
+                              : "bg-red-50 text-red-600"
+                          }`}
+                          style={{ fontFamily: F }}
+                        >
+                          {bookingStatus === "success"
+                            ? "✓ تم إرسال طلب معاينة السكن للمالك بنجاح!"
+                            : `✕ ${bookingStatus}`}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={bookingLoading}
+                        className="w-full py-3 rounded-xl font-bold text-white text-xs bg-[#001d28] transition-opacity hover:opacity-90 disabled:opacity-50 border-none cursor-pointer flex items-center justify-center gap-1.5"
                         style={{ fontFamily: F }}
                       >
-                        {bookingRequestStatus === "success"
-                          ? "✓ تم إرسال طلب الحجز بنجاح وبانتظار موافقة المالك!"
-                          : `✕ ${bookingRequestStatus}`}
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={bookingRequestLoading}
-                      className="w-full py-3 rounded-xl font-bold text-white text-xs bg-emerald-600 transition-opacity hover:opacity-90 disabled:opacity-50 border-none cursor-pointer flex items-center justify-center gap-1.5"
-                      style={{ fontFamily: F }}
-                    >
-                      <FileText size={14} />
-                      {bookingRequestLoading ? "جاري الإرسال..." : "إرسال طلب الحجز"}
-                    </button>
-                  </form>
-                ) : (
-                  <div
-                    className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 text-right text-amber-800 text-xs flex flex-col gap-2"
-                    style={{ fontFamily: F }}
-                  >
-                    <p className="font-semibold text-amber-900">ملاحظة بشأن طلب الحجز:</p>
-                    <p className="leading-relaxed">
-                      لتقديم طلب تأجير رسمي لهذا السكن، يتطلب أولاً تقديم طلب معاينة بالأسفل والحصول على موافقة معتمدة من مالك العقار.
-                    </p>
-                  </div>
-                )}
-
-                {/* Appointment booking form */}
-                <form
-                  onSubmit={handleRequestAppointment}
-                  className="bg-white rounded-2xl p-5 flex flex-col gap-3 text-right"
-                  style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
-                >
-                  <h4 className="text-[#001d28] font-bold text-sm border-b pb-2 mb-1" style={{ fontFamily: C }}>طلب تحديد موعد معاينة</h4>
-                  
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-[#001d28] font-semibold">تاريخ الزيارة المقترح</label>
-                    <input
-                      type="date"
-                      required
-                      value={appointmentDate}
-                      min={new Date().toISOString().split("T")[0]}
-                      onChange={(e) => setAppointmentDate(e.target.value)}
-                      className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none cursor-pointer"
-                      style={{ fontFamily: F }}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-[#001d28] font-semibold">رسالة للمالك (اختياري)</label>
-                    <textarea
-                      placeholder="اكتب استفساراتك أو تفاصيل إضافية للمالك..."
-                      value={tenantMessage}
-                      onChange={(e) => setTenantMessage(e.target.value)}
-                      rows={3}
-                      className="bg-[#f3f4f5] rounded-xl px-4 py-2.5 text-xs text-[#001d28] outline-none text-right border-none resize-none"
-                      style={{ fontFamily: F }}
-                    />
-                  </div>
-
-                  {bookingStatus && (
-                    <div
-                      className={`p-3 rounded-xl text-[10px] text-right font-bold ${
-                        bookingStatus === "success"
-                          ? "bg-green-50 text-green-700"
-                          : "bg-red-50 text-red-600"
-                      }`}
-                      style={{ fontFamily: F }}
-                    >
-                      {bookingStatus === "success"
-                        ? "✓ تم إرسال طلب معاينة السكن للمالك بنجاح!"
-                        : `✕ ${bookingStatus}`}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={bookingLoading}
-                    className="w-full py-3 rounded-xl font-bold text-white text-xs bg-[#001d28] transition-opacity hover:opacity-90 disabled:opacity-50 border-none cursor-pointer flex items-center justify-center gap-1.5"
-                    style={{ fontFamily: F }}
-                  >
-                    <Calendar size={14} />
-                    {bookingLoading ? "جاري الإرسال..." : "إرسال طلب معاينة"}
-                  </button>
-                </form>
+                        <Calendar size={14} />
+                        {bookingLoading ? "جاري الإرسال..." : "إرسال طلب معاينة"}
+                      </button>
+                    </form>
+                  );
+                })()}
               </div>
             ) : (
               <div className="flex flex-col gap-2">

@@ -1007,14 +1007,14 @@ namespace Sakani.DAL.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("WishlistId")
+                    b.Property<int>("WishListId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApartmentId");
 
-                    b.HasIndex("WishlistId");
+                    b.HasIndex("WishListId");
 
                     b.ToTable("WishListApartments", (string)null);
                 });
@@ -1348,15 +1348,15 @@ namespace Sakani.DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Sakani.Domain.Entities.WishList", "Wishlist")
+                    b.HasOne("Sakani.Domain.Entities.WishList", "WishList")
                         .WithMany("WishListApartments")
-                        .HasForeignKey("WishlistId")
+                        .HasForeignKey("WishListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Apartment");
 
-                    b.Navigation("Wishlist");
+                    b.Navigation("WishList");
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.Admin", b =>

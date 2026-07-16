@@ -15,7 +15,8 @@ namespace Sakani.BLL.Mapping
         public MappingProfile()
         {
             CreateMap<Apartment, TenantApartmentDto>()
-                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Owner != null ? $"{src.Owner.FirstName} {src.Owner.LastName}".Trim() : string.Empty));
+                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Owner != null ? $"{src.Owner.FirstName} {src.Owner.LastName}".Trim() : string.Empty))
+                .ForMember(dest => dest.OwnerProfileImage, opt => opt.MapFrom(src => src.Owner != null ? src.Owner.ProfileImageUrl : null));
 
             CreateMap<ApartmentMedia, ApartmentMediaDto>().ReverseMap();
             CreateMap<Amenities, AmenitiesDto>().ReverseMap();

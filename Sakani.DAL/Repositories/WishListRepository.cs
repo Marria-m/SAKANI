@@ -27,6 +27,9 @@ namespace Sakani.DAL.Repositories
                 .Where(w => w.WishList.TenantId == tenantId)
                 .AsNoTracking()
                 .Include(w => w.Apartment)
+                    .ThenInclude(a => a.Media)
+                .Include(w => w.Apartment)
+                    .ThenInclude(a => a.Amenities)
                 .ToListAsync();
         }
 

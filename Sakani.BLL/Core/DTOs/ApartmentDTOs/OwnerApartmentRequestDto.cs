@@ -21,5 +21,20 @@ namespace Sakani.BLL.Core.DTOs.ApartmentDTOs
         public List<AmenitiesDto> Amenities { get; set; } = new();
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+
+        public int AreaSqm { get; set; }
+        public int Floor { get; set; }
+        public bool IsFurnished { get; set; }
+        public ApartmentType? ApartmentType { get; set; }
+        public double SecurityDeposit { get; set; }
+        public ElectricityType? ElectricityType { get; set; }
+        public bool IsElectricityIncluded { get; set; }
+        public GasType? GasType { get; set; }
+        public int DistanceMinutes { get; set; }
+        public NearbyServices NearbyServices { get; set; }
+        public bool IsVerified { get; set; }
+        public int ViewsCount { get; set; }
+        public PropertyStatus ListingStatus { get; set; }
+        public double DistanceKm { get; set; }
     }
 }
