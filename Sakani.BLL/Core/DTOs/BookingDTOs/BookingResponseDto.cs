@@ -16,5 +16,11 @@ namespace Sakani.BLL.Core.DTOs.BookingDTOs
         public string ApartmentCity { get; set; } = string.Empty;
         public double ApartmentPrice { get; set; }
         public string OwnerName { get; set; } = string.Empty;
+        public string TenantName { get; set; } = string.Empty;
+        public string TenantEmail { get; set; } = string.Empty;
+        public string TenantPhone { get; set; } = string.Empty;
+        public int TenantId { get; set; }
+        public string? ApartmentImageUrl { get; set; }
+        public string? TenantProfileImageUrl { get; set; }
     }
 }

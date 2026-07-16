@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sakani.DAL.Repositories
 {
@@ -9,9 +12,9 @@ namespace Sakani.DAL.Repositories
     {
         public WishListRepository(AppDbContext context) : base(context) { }
 
-        public  async Task<(bool IsSuccess, string Message)> ExistsAsync(int wishlistId, int apartmentId)
+        public async Task<(bool IsSuccess, string Message)> ExistsAsync(int wishlistId, int apartmentId)
         {
-            var target = await _context.WishListApartments.AnyAsync(w => w.WishlistId == wishlistId && w.ApartmentId == apartmentId);
+            var target = await _context.WishListApartments.AnyAsync(w => w.WishListId == wishlistId && w.ApartmentId == apartmentId);
             if (!target) 
                 return (false, $"Apartment ID {apartmentId} was not found in Wishlist ID {wishlistId}.");
 
@@ -21,7 +24,7 @@ namespace Sakani.DAL.Repositories
         public async Task<IReadOnlyList<WishListApartment>> GetByTenantIdAsync(int tenantId)
         {
             return await _context.WishListApartments
-                .Where(w => w.Wishlist.TenantId == tenantId)
+                .Where(w => w.WishList.TenantId == tenantId)
                 .AsNoTracking()
                 .Include(w => w.Apartment)
                 .ToListAsync();
@@ -29,8 +32,8 @@ namespace Sakani.DAL.Repositories
 
         public async Task<(bool IsSuccess, string Message)> RemoveApartmentFromWishListAsync(int tenantId, int apartmentId)
         {
-            var target = await _context.WishListApartments.FirstOrDefaultAsync(w => w.Wishlist.TenantId == tenantId && w.ApartmentId == apartmentId);
-            if(target is null)
+            var target = await _context.WishListApartments.FirstOrDefaultAsync(w => w.WishList.TenantId == tenantId && w.ApartmentId == apartmentId);
+            if (target is null)
                 return (false, $"Apartment ID {apartmentId} was not found in Tenant ID {tenantId}'s wishlist.");
             
             _context.WishListApartments.Remove(target);

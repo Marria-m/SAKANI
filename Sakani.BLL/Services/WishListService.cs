@@ -48,7 +48,7 @@ namespace Sakani.BLL.Services
 
             var wishListApartment = new WishListApartment
             {
-                Wishlist = wishList,
+                WishList = wishList,
                 ApartmentId = apartmentId
             };
             await wishListRepository.AddAsync(wishListApartment);

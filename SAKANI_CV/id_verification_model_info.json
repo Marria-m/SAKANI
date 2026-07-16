@@ -1,0 +1,33 @@
+{
+  "task": "ID Verification (Face Matching)",
+  "best_method": "ArcFace",
+  "model_used": "InsightFace buffalo_l (ArcFace backbone)",
+  "input": "Two face images (student selfie + ID card photo)",
+  "output": "cosine similarity score [0-1]",
+  "threshold": 0.3,
+  "usage": "if cosine_similarity(emb1, emb2) >= threshold: same_person",
+  "accuracy": 0.9869,
+  "auc": 0.9884,
+  "far": 0.0,
+  "frr": 0.0262,
+  "comparison": [
+    {
+      "method": "DeepFace",
+      "accuracy": 0.945,
+      "auc": 0.9739,
+      "far": 0.04,
+      "frr": 0.07,
+      "avg_time_ms": 296.2,
+      "is_best": false
+    },
+    {
+      "method": "ArcFace",
+      "accuracy": 0.9869,
+      "auc": 0.9884,
+      "far": 0.0,
+      "frr": 0.0262,
+      "avg_time_ms": 1739.1,
+      "is_best": true
+    }
+  ]
+}

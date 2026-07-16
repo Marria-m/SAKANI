@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -32,7 +35,7 @@ namespace SAKANI.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var apartment = await _apartmentService.GetWithDetailsAsync(id);
+            var apartment = await _apartmentService.GetByIdAsync(id);
             if (apartment == null)
             {
                 return NotFound(new { message = $"Apartment with ID {id} not found." });
@@ -50,22 +53,15 @@ namespace SAKANI.Controllers
         [HttpGet("filter")]
         public async Task<IActionResult> GetFiltered([FromQuery] ApartmentFilterDto filterDto)
         {
-            try
-            {
-                var result = await _apartmentService.GetFilteredApartmentsAsync(filterDto);
-                return Ok(new { items = result.Items, totalCount = result.TotalCount });
-            }
-            catch (NotImplementedException)
-            {
-                return StatusCode(StatusCodes.Status501NotImplemented, new { message = "Filter functionality is not yet implemented." });
-            }
+            var result = await _apartmentService.GetFilteredApartmentsAsync(filterDto);
+            return Ok(new { items = result.Items, totalCount = result.TotalCount });
         }
 
         // ==========================================
         // Authenticated Owner Endpoints
         // ==========================================
 
-        [Authorize(Roles="Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OwnerApartmentRequestDto dto)
         {
@@ -87,7 +83,7 @@ namespace SAKANI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdApartment.Id }, createdApartment);
         }
 
-        [Authorize(Roles="Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] OwnerApartmentRequestDto dto)
         {
@@ -121,7 +117,7 @@ namespace SAKANI.Controllers
             return Ok(updatedApartment);
         }
 
-        [Authorize(Roles="Owner")]
+        [Authorize(Roles = "Owner")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

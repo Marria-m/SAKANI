@@ -13,9 +13,9 @@ namespace Sakani.DAL.Data.Configuration.ApartmentConfig
             builder.HasKey(wa => wa.Id);
 
             // Relationships
-            builder.HasOne(wa => wa.Wishlist)
+            builder.HasOne(wa => wa.WishList)
                .WithMany(w => w.WishListApartments)   
-               .HasForeignKey(wa => wa.WishlistId)
+               .HasForeignKey(wa => wa.WishListId)
                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(wa => wa.Apartment)

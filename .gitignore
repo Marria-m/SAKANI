@@ -482,3 +482,16 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# SAKANI ML/DL models and binaries (prevent committing large files to Git)
+SAKANI_CV/*.pt
+SAKANI_CV/*.onnx
+SAKANI_CV/*.pkl
+
+# SAKANI local databases and Chroma vector database files
+SAKANI_NLP/chroma_db/
+*.sqlite3
+*.db
+
+# VS Code workspace settings
+.vscode/

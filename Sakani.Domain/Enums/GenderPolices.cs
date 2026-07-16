@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,8 @@ namespace Sakani.Domain.Enums
 {
     public enum GenderPolices
     {
-        OnlyMale,
-        OnlyFemale,
-        OnlyFamily
+        Male,
+        Female,
+        Any
     }
 }

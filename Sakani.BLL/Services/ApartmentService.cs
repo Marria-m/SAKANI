@@ -49,12 +49,6 @@ namespace Sakani.BLL.Services
 
         public async Task<TenantApartmentDto?> GetByIdAsync(int id)
         {
-            var apartment = await _apartmentRepository.GetByIdAsync(id);
-            return _mapper.Map<TenantApartmentDto?>(apartment);
-        }
-
-        public async Task<TenantApartmentDto?> GetWithDetailsAsync(int id)
-        {
             var apartment = await _apartmentRepository.GetWithDetailsAsync(id);
             return _mapper.Map<TenantApartmentDto?>(apartment);
         }
@@ -154,9 +148,25 @@ namespace Sakani.BLL.Services
             return true;
         }
 
-        public Task<(IReadOnlyList<TenantApartmentDto> Items, int TotalCount)> GetFilteredApartmentsAsync(ApartmentFilterDto filterDto)
+        public async Task<(IReadOnlyList<TenantApartmentDto> Items, int TotalCount)> GetFilteredApartmentsAsync(ApartmentFilterDto filterDto)
         {
-            throw new NotImplementedException();
+            var result = await _apartmentRepository.GetFilteredAsync(
+                filterDto.Location,
+                filterDto.City,
+                filterDto.MinPrice,
+                filterDto.MaxPrice,
+                filterDto.MinRooms ?? filterDto.NoOfRooms,
+                filterDto.MaxCapacity,
+                filterDto.IsBarginAllowed,
+                filterDto.GenderPolices.HasValue ? (int?)filterDto.GenderPolices.Value : null,
+                filterDto.Status.HasValue ? (int?)filterDto.Status.Value : null,
+                filterDto.Amenities,
+                filterDto.PageIndex > 0 ? filterDto.PageIndex : filterDto.PageNumber,
+                filterDto.PageSize > 0 ? filterDto.PageSize : 10
+            );
+
+            var mappedItems = _mapper.Map<IReadOnlyList<TenantApartmentDto>>(result.Items);
+            return (mappedItems, result.TotalCount);
         }
     }
 }
