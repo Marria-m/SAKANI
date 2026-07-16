@@ -36,6 +36,11 @@ namespace Sakani.BLL
             // Token Service
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+            // Apartment Service
+            services.AddScoped<IApartmentService, ApartmentService>();
+
+            // Wishlist Service
+            services.AddScoped<IWishListService, WishListService>();
             // AI Service (Python microservice at localhost:8001)
             services.AddHttpClient<IAiService, AiService>(client =>
             {

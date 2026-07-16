@@ -1,3 +1,6 @@
+using AutoMapper;
+using Sakani.BLL.Core.DTOs.ApartmentDTOs;
+using Sakani.BLL.Core.DTOs.WishListDTOs;
 using System.Linq;
 using AutoMapper;
 using Sakani.BLL.Core.DTOs.AppointmentDTOs;
@@ -12,6 +15,15 @@ namespace Sakani.BLL.Mapping
     {
         public MappingProfile()
         {
+            CreateMap<Apartment, TenantApartmentDto>()
+                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Owner != null ? $"{src.Owner.FirstName} {src.Owner.LastName}".Trim() : string.Empty));
+
+            CreateMap<ApartmentMedia, ApartmentMediaDto>().ReverseMap();
+            CreateMap<Amenities, AmenitiesDto>().ReverseMap();
+
+            CreateMap<OwnerApartmentRequestDto, Apartment>();
+
+            CreateMap<WishListApartment, WishListDto>();
             CreateMap<Booking, BookingResponseDto>()
                 .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? $"{src.Appointment.Tenant.FirstName} {src.Appointment.Tenant.LastName}" : string.Empty))
                 .ForMember(dest => dest.TenantEmail, opt => opt.MapFrom(src => src.Appointment != null && src.Appointment.Tenant != null ? src.Appointment.Tenant.Email : string.Empty))
