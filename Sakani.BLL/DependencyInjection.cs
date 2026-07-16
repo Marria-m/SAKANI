@@ -45,6 +45,7 @@ namespace Sakani.BLL
             // Tenant Service
             services.AddScoped<ITenantService, TenantService>();
             services.AddScoped<ITenantBookingService, TenantBookingService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
 
             return services;
         }
