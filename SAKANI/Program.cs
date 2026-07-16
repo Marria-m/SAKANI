@@ -91,6 +91,27 @@ namespace SAKANI
                 );
             });
 
+            // CORS for React frontend
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactDev", policy =>
+                {
+                    policy.WithOrigins(
+                            "http://localhost:5173", "https://localhost:5173",
+                            "http://localhost:5174", "https://localhost:5174",
+                            "http://localhost:5175", "https://localhost:5175",
+                            "http://localhost:5176", "https://localhost:5176",
+                            "http://localhost:5177", "https://localhost:5177",
+                            "http://localhost:5178", "https://localhost:5178",
+                            "http://localhost:5179", "https://localhost:5179",
+                            "http://localhost:5180", "https://localhost:5180"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             builder.Services.AddControllers();
 
             // Swagger with Bearer security
@@ -114,22 +135,97 @@ namespace SAKANI
 
             var app = builder.Build();
 
-            // Seed Roles on startup
+            // Migrate and Seed Database on startup
             using (var scope = app.Services.CreateScope())
             {
-                var roleManager = scope.ServiceProvider
-                    .GetRequiredService<RoleManager<IdentityRole<int>>>();
-                foreach (var role in new[] { "Admin", "Owner", "Tenant" })
-                    if (!await roleManager.RoleExistsAsync(role))
-                        await roleManager.CreateAsync(new IdentityRole<int>(role));
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<AppDbContext>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+                    
+                    // Apply pending migrations and seed mock data
+                    await context.Database.MigrateAsync();
+                    await DbSeeder.SeedDataAsync(context, userManager, roleManager);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Sakani Backend] Error during DB migration or seeding: {ex.Message}");
+                }
             }
+
+            // Ensure wwwroot/uploads directories exist
+            var uploadsPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "apartments"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "profiles"));
+            Directory.CreateDirectory(Path.Combine(uploadsPath, "uploads", "issues"));
 
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseCors("AllowReactDev");
+            app.UseStaticFiles(); // serve wwwroot/uploads/*
             app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+
+            #if DEBUG
+            // Start frontend process and Python AI Service automatically in development environment
+            if (app.Environment.IsDevelopment())
+            {
+                var frontendPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "sakani-frontend"));
+                if (Directory.Exists(frontendPath))
+                {
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            var processInfo = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = "/c npm run dev",
+                                WorkingDirectory = frontendPath,
+                                UseShellExecute = true,
+                                CreateNoWindow = false
+                            };
+                            System.Diagnostics.Process.Start(processInfo);
+                            Console.WriteLine($"[Sakani Backend] React frontend dev server started in: {frontendPath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[Sakani Backend] Failed to auto-start frontend: {ex.Message}");
+                        }
+                    });
+                }
+
+                var pythonPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "SAKANI_NLP"));
+                if (Directory.Exists(pythonPath))
+                {
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            var processInfo = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = "/c python sakani_ai.py",
+                                WorkingDirectory = pythonPath,
+                                UseShellExecute = true,
+                                CreateNoWindow = false
+                            };
+                            System.Diagnostics.Process.Start(processInfo);
+                            Console.WriteLine($"[Sakani Backend] Python AI Service started in: {pythonPath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[Sakani Backend] Failed to auto-start Python AI Service: {ex.Message}");
+                        }
+                    });
+                }
+            }
+            #endif
+
             app.Run();
         }
     }

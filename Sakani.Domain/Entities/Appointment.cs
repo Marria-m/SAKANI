@@ -18,5 +18,8 @@ namespace Sakani.Domain.Entities
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; }
         public Booking Booking { get; set; }
+
+        public int ApartmentId { get; set; }
+        public Apartment Apartment { get; set; }
     }
 }

@@ -35,6 +35,11 @@ namespace Sakani.DAL.Data.Configuration.BookingConfig
                 .WithOne(b => b.Appointment)
                 .HasForeignKey<Booking>(b => b.AppointmentId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Apartment)
+                .WithMany(apt => apt.Appointments)
+                .HasForeignKey(a => a.ApartmentId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

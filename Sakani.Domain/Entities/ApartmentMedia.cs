@@ -13,6 +13,8 @@ namespace Sakani.Domain.Entities
 
         public MediaType MediaType { get; set; }
 
+        public string? Tag { get; set; }
+
         // Navigation Properties
         public int ApartmentId { get; set; }
         public Apartment Apartment { get; set; }

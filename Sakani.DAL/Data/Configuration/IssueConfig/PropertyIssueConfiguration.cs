@@ -32,7 +32,28 @@ namespace Sakani.DAL.Data.Configuration.IssueConfig
             builder.Property(p => p.IsSeen)
                 .IsRequired();
 
+            builder.Property(p => p.OwnerResponse)
+                .HasMaxLength(2000)
+                .IsRequired(false);
+
+            builder.Property(p => p.AiCategory)
+                .HasMaxLength(100)
+                .IsRequired(false);
+
+            builder.Property(p => p.AiSeverity)
+                .HasMaxLength(50)
+                .IsRequired(false);
+
+            builder.Property(p => p.AiSuggestedAction)
+                .HasMaxLength(500)
+                .IsRequired(false);
+
             // Relationships
+            builder.HasOne(p => p.Apartment)
+                .WithMany(a => a.PropertyIssues)
+                .HasForeignKey(p => p.ApartmentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(p => p.Tenant)
                 .WithMany(t => t.PropertyIssues)
                 .HasForeignKey(p => p.TenantId)

@@ -41,6 +41,37 @@ namespace Sakani.BLL
 
             // Wishlist Service
             services.AddScoped<IWishListService, WishListService>();
+            // AI Service (Python microservice at localhost:8001)
+            services.AddHttpClient<IAiService, AiService>(client =>
+            {
+                client.BaseAddress = new Uri(
+                    configuration["AiService:BaseUrl"] ?? "http://localhost:8001");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            // File Service (wwwroot/uploads)
+            services.AddScoped<IFileService, FileService>();
+
+            // Apartment Service
+            services.AddScoped<IApartmentService, ApartmentService>();
+
+            // Booking Services 
+            services.AddScoped<IBookingManagementService, BookingManagementService>();
+            
+            // Appointment Services 
+            services.AddScoped<IAppointmentManagementService, AppointmentManagementService>();
+            
+            // Tenant View Services 
+            services.AddScoped<ITenantViewService, TenantViewService>();
+            
+            // ID Verification Services 
+            services.AddScoped<IIdVerificationService, IdVerificationService>();
+            
+            // Property Issue Management Services
+            services.AddScoped<IPropertyIssueManagementService, PropertyIssueManagementService>();
+
+            // Dashboard Services
+            services.AddScoped<IDashboardService, DashboardService>();
 
             return services;
         }
