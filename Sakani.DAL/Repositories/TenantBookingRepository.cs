@@ -39,5 +39,14 @@ namespace Sakani.DAL.Repositories
                 .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<Booking?> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.Bookings
+                .Include(b => b.Appointment)
+                    .ThenInclude(a => a.Apartment)
+                        .ThenInclude(ap => ap.Owner)
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
     }
 }

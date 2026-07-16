@@ -9,5 +9,6 @@ namespace Sakani.Domain.Interfaces
         Task<bool> HasActiveBookingRequestAsync(int tenantId, int apartmentId);
         Task<IReadOnlyList<Booking>> GetByTenantIdAsync(int tenantId);
         Task<IReadOnlyList<Booking>> GetPendingBookingsForApartmentAsync(int apartmentId);
+        Task<Booking?> GetByIdWithDetailsAsync(int id);
     }
 }
