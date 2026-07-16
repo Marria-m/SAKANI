@@ -76,10 +76,8 @@ namespace SAKANI.Controllers
                 return Unauthorized();
             }
 
-            // Force OwnerId to match the authenticated user
             dto.OwnerId = userId;
-
-            var createdApartment = await _apartmentService.CreateAsync(dto);
+            var createdApartment = await _apartmentService.CreateAsync(dto, userId);
             return CreatedAtAction(nameof(GetById), new { id = createdApartment.Id }, createdApartment);
         }
 
@@ -98,17 +96,14 @@ namespace SAKANI.Controllers
                 return Unauthorized();
             }
 
-            // Check if the apartment belongs to this owner
             var isOwned = await _apartmentService.IsOwnedByAsync(id, userId);
             if (!isOwned)
             {
                 return Forbid();
             }
 
-            // Force OwnerId to match the authenticated user
             dto.OwnerId = userId;
-
-            var updatedApartment = await _apartmentService.UpdateAsync(id, dto);
+            var updatedApartment = await _apartmentService.UpdateAsync(id, dto, userId);
             if (updatedApartment == null)
             {
                 return NotFound(new { message = $"Apartment with ID {id} not found." });
@@ -127,20 +122,95 @@ namespace SAKANI.Controllers
                 return Unauthorized();
             }
 
-            // Check if the apartment belongs to this owner
             var isOwned = await _apartmentService.IsOwnedByAsync(id, userId);
             if (!isOwned)
             {
                 return Forbid();
             }
 
-            var deleted = await _apartmentService.DeleteAsync(id);
+            var deleted = await _apartmentService.DeleteAsync(id, userId);
             if (!deleted)
             {
                 return NotFound(new { message = $"Apartment with ID {id} not found." });
             }
 
             return NoContent();
+        }
+
+        [Authorize(Roles = "Owner")]
+        [HttpPost("{id:int}/media")]
+        public async Task<IActionResult> UploadMedia(int id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal) || !int.TryParse(userIdVal, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var mediaDto = await _apartmentService.UploadMediaAsync(id, userId, file);
+                return Ok(mediaDto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Owner")]
+        [HttpDelete("{apartmentId:int}/media/{mediaId:int}")]
+        public async Task<IActionResult> DeleteMedia(int apartmentId, int mediaId)
+        {
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal) || !int.TryParse(userIdVal, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var success = await _apartmentService.RemoveMediaAsync(apartmentId, mediaId, userId);
+            if (!success)
+            {
+                return NotFound(new { message = "Apartment/Media not found or access denied." });
+            }
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Owner")]
+        [HttpGet("{id:int}/price-suggestion")]
+        public async Task<IActionResult> GetPriceSuggestion(int id)
+        {
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal) || !int.TryParse(userIdVal, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var suggestion = await _apartmentService.GetPriceSuggestionAsync(id, userId);
+                return Ok(suggestion);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
     }
 }

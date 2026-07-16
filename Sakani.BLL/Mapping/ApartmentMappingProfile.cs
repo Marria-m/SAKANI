@@ -20,7 +20,6 @@ namespace Sakani.BLL.Mapping
                 .ForMember(dest => dest.Amenities, opt => opt.MapFrom(src => src.Amenities));
 
             CreateMap<ApartmentMedia, ApartmentMediaDto>();
-            CreateMap<Amenities, ApartmentAmenityDto>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,7 @@ namespace Sakani.BLL.Core.DTOs.ApartmentDTOs
 {
     public class AmenitiesDto
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string IconUrl { get; set; }
     }

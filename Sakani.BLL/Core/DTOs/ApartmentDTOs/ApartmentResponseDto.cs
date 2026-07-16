@@ -40,13 +40,6 @@ namespace Sakani.BLL.Core.DTOs.ApartmentDTOs
         public string? OwnerProfileImage { get; set; }
 
         public List<ApartmentMediaDto> Media { get; set; } = new();
-        public List<ApartmentAmenityDto> Amenities { get; set; } = new();
-    }
-
-    public class ApartmentAmenityDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string IconUrl { get; set; } = null!;
+        public List<AmenitiesDto> Amenities { get; set; } = new();
     }
 }

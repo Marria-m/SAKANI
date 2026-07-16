@@ -19,5 +19,7 @@ namespace Sakani.BLL.Core.DTOs.ApartmentDTOs
         public int OwnerId { get; set; }
         public List<ApartmentMediaDto> Media { get; set; } = new();
         public List<AmenitiesDto> Amenities { get; set; } = new();
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

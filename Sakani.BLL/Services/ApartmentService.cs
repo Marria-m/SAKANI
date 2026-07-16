@@ -1,10 +1,15 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Sakani.BLL.Core.DTOs.AiDTOs;
 using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.Interfaces;
 using Sakani.Domain.Entities;
+using Sakani.Domain.Enums;
 using Sakani.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +25,8 @@ namespace Sakani.BLL.Services
         private readonly ITenantBookingRepository _bookingRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFileService _fileService;
+        private readonly IAiService _aiService;
 
         public ApartmentService(
             IApartmentRepository apartmentRepository,
@@ -29,7 +36,9 @@ namespace Sakani.BLL.Services
             IAppointmentRepository appointmentRepository,
             ITenantBookingRepository bookingRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IFileService fileService,
+            IAiService aiService)
         {
             _apartmentRepository = apartmentRepository;
             _amenitiesRepository = amenitiesRepository;
@@ -39,6 +48,8 @@ namespace Sakani.BLL.Services
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _fileService = fileService;
+            _aiService = aiService;
         }
 
         public async Task<IEnumerable<TenantApartmentDto>> GetAllAsync()
@@ -64,18 +75,34 @@ namespace Sakani.BLL.Services
             return await _apartmentRepository.IsOwnedByAsync(apartmentId, ownerId);
         }
 
-        public async Task<TenantApartmentDto> CreateAsync(OwnerApartmentRequestDto dto)
+        public async Task<TenantApartmentDto> CreateAsync(OwnerApartmentRequestDto dto, int ownerId)
         {
             var apartment = _mapper.Map<Apartment>(dto);
+            apartment.OwnerId = ownerId;
+            apartment.Status = AppartmentStatus.Empty;
+            apartment.CurrentOccupied = 0;
+
             await _apartmentRepository.AddAsync(apartment);
+
+            // Increment owner's active property count
+            var owner = await _unitOfWork.Repository<Owner>().GetByIdAsync(ownerId);
+            if (owner != null)
+            {
+                owner.TotalActiveProperties++;
+                _unitOfWork.Repository<Owner>().Update(owner);
+            }
+
             await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<TenantApartmentDto>(apartment);
+
+            // Reload apartment with details
+            var reloadedApartment = await _apartmentRepository.GetWithDetailsAsync(apartment.Id);
+            return _mapper.Map<TenantApartmentDto>(reloadedApartment ?? apartment);
         }
 
-        public async Task<TenantApartmentDto?> UpdateAsync(int id, OwnerApartmentRequestDto dto)
+        public async Task<TenantApartmentDto?> UpdateAsync(int id, OwnerApartmentRequestDto dto, int ownerId)
         {
             var apartment = await _apartmentRepository.GetByIdAsync(id);
-            if (apartment == null)
+            if (apartment == null || apartment.OwnerId != ownerId)
             {
                 return null;
             }
@@ -83,16 +110,19 @@ namespace Sakani.BLL.Services
             _mapper.Map(dto, apartment);
             _apartmentRepository.Update(apartment);
             await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<TenantApartmentDto>(apartment);
+
+            var reloaded = await _apartmentRepository.GetWithDetailsAsync(id);
+            return _mapper.Map<TenantApartmentDto>(reloaded ?? apartment);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, int ownerId)
         {
             var apartment = await _apartmentRepository.GetWithDetailsAsync(id);
-            if (apartment == null)
-            {
+            if (apartment == null || apartment.OwnerId != ownerId)
                 return false;
-            }
+
+            apartment.IsDeleted = true;
+            _apartmentRepository.Update(apartment);
 
             // 1. Manually delete bookings referencing this apartment's appointments
             var bookings = await _bookingRepository.GetByApartmentIdAsync(id);
@@ -123,12 +153,13 @@ namespace Sakani.BLL.Services
                 }
             }
 
-            // 4. Manually delete related Media
+            // 4. Manually delete associated media files and database records
             if (apartment.Media != null && apartment.Media.Count > 0)
             {
-                foreach (var mediaItem in apartment.Media.ToList())
+                foreach (var media in apartment.Media.ToList())
                 {
-                    _mediaRepository.Delete(mediaItem);
+                    _fileService.DeleteFile(media.MediaUrl);
+                    _mediaRepository.Delete(media);
                 }
             }
 
@@ -141,8 +172,13 @@ namespace Sakani.BLL.Services
                 }
             }
 
-            // 6. Finally delete the apartment itself
-            _apartmentRepository.Delete(apartment);
+            // Decrement owner's active property count
+            var owner = await _unitOfWork.Repository<Owner>().GetByIdAsync(ownerId);
+            if (owner != null && owner.TotalActiveProperties > 0)
+            {
+                owner.TotalActiveProperties--;
+                _unitOfWork.Repository<Owner>().Update(owner);
+            }
 
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -167,6 +203,90 @@ namespace Sakani.BLL.Services
 
             var mappedItems = _mapper.Map<IReadOnlyList<TenantApartmentDto>>(result.Items);
             return (mappedItems, result.TotalCount);
+        }
+
+        public async Task<ApartmentMediaDto> UploadMediaAsync(int apartmentId, int ownerId, IFormFile file)
+        {
+            var apartment = await _apartmentRepository.GetByIdAsync(apartmentId);
+            if (apartment == null || apartment.OwnerId != ownerId || apartment.IsDeleted)
+                throw new KeyNotFoundException("Apartment not found or access denied.");
+
+            // 1. Upload file locally
+            var relativeUrl = await _fileService.UploadFileAsync(file, "apartments");
+            var physicalPath = _fileService.GetPhysicalPath(relativeUrl);
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var isVideo = extension == ".mp4" || extension == ".webm" || extension == ".mov";
+
+            string? tag = null;
+
+            if (!isVideo)
+            {
+                var qualityResult = await _aiService.CheckImageQualityAsync(physicalPath);
+                if (qualityResult != null && !qualityResult.IsAcceptable)
+                {
+                    _fileService.DeleteFile(relativeUrl);
+                    throw new ArgumentException("Image rejected by AI quality check: " + string.Join(", ", qualityResult.Issues));
+                }
+
+                var tagResult = await _aiService.AutoTagImageAsync(physicalPath);
+                if (tagResult != null && tagResult.IsValidRoom)
+                {
+                    tag = tagResult.Label;
+                }
+            }
+
+            var media = new ApartmentMedia
+            {
+                ApartmentId = apartmentId,
+                MediaUrl = relativeUrl,
+                MediaType = isVideo ? MediaType.Video : MediaType.Image,
+                Tag = tag
+            };
+
+            await _mediaRepository.AddAsync(media);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ApartmentMediaDto>(media);
+        }
+
+        public async Task<bool> RemoveMediaAsync(int apartmentId, int mediaId, int ownerId)
+        {
+            var apartment = await _apartmentRepository.GetByIdAsync(apartmentId);
+            if (apartment == null || apartment.OwnerId != ownerId || apartment.IsDeleted)
+                return false;
+
+            var media = await _mediaRepository.GetByIdAsync(mediaId);
+            if (media == null || media.ApartmentId != apartmentId)
+                return false;
+
+            _fileService.DeleteFile(media.MediaUrl);
+            _mediaRepository.Delete(media);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<PricePredictionResultDto> GetPriceSuggestionAsync(int apartmentId, int ownerId)
+        {
+            var apartment = await _apartmentRepository.GetWithDetailsAsync(apartmentId);
+            if (apartment == null || apartment.OwnerId != ownerId)
+                throw new KeyNotFoundException("Apartment not found or access denied.");
+
+            var request = new PricePredictionRequestDto
+            {
+                City = apartment.City,
+                GenderPolicy = apartment.GenderPolices.ToString().ToUpper(),
+                NumRooms = apartment.NoOfRooms,
+                DistanceKm = apartment.DistanceKm,
+                AvgRating = apartment.Owner?.AvgRating ?? 0.0,
+                NumAmenities = apartment.Amenities?.Count ?? 0,
+                Floor = apartment.Floor,
+                AreaSqm = apartment.AreaSqm,
+                IsFurnished = apartment.IsFurnished ? 1 : 0
+            };
+
+            return await _aiService.PredictPriceAsync(request);
         }
     }
 }
