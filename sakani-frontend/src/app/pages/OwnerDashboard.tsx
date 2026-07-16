@@ -36,6 +36,7 @@ function StatCard({
       <div>
         <div className="text-[#001d28] font-black text-3xl" style={{ fontFamily: C }}>{value}</div>
         <div className="text-[#71787c] text-sm mt-0.5" style={{ fontFamily: F }}>{label}</div>
+        {sub && <div className="text-[#94a3b8] text-[10px] mt-0.5" style={{ fontFamily: F }}>{sub}</div>}
       </div>
     </div>
   );

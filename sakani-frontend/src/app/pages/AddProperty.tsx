@@ -9,11 +9,11 @@ import InteractiveMap from "../components/InteractiveMap";
 
 import ownerProfile from "@/imports/SakaniBasicDataRender/4bcee8928a1197c9f7436fab69e36b4701bd578b.png";
 import amenityBg from "@/imports/SakaniHousingCodeRender/b4bf2c3d8a92a200b00cb9d577974cdac035a321.png";
-import mapImg from "@/imports/SakaniLocationServicesRender/5ec34a449a94714daf4f8c50a0ed57dd9881bd69.png";
 import userProfile from "@/imports/SakaniLocationServicesRender/3e594baa3e964880d48f88e16d741a6e6f6eb318.png";
 import uploadPreview from "@/imports/SakaniMediaTrustRender/86210c4743cf38317a6e55bcbf3548494e3e0b1d.png";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../context/AuthContext";
+import CustomSelect from "../components/CustomSelect";
 
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";
@@ -34,7 +34,36 @@ const AMENITY_LIST = [
   { key: "laundry", label: "غسيل", icon: WashingMachine },
 ];
 
-const EGYPT_CITIES = ["القاهرة", "الجيزة", "الإسكندرية", "المنصورة", "طنطا", "أسيوط", "الزقازيق", "الفيوم"];
+const EGYPT_CITIES = [
+  "القاهرة",
+  "الجيزة",
+  "الإسكندرية",
+  "المنصورة",
+  "طنطا",
+  "أسيوط",
+  "الزقازيق",
+  "الفيوم",
+  "المنيا",
+  "سوهاج",
+  "قنا",
+  "الأقصر",
+  "أسوان",
+  "بني سويف",
+  "شبين الكوم",
+  "بنها",
+  "دمنهور",
+  "كفر الشيخ",
+  "دمياط",
+  "بورسعيد",
+  "الإسماعيلية",
+  "السويس",
+  "العريش",
+  "الطور",
+  "الغردقة",
+  "مرسى مطروح",
+  "الخارجة",
+  "الوادى الجديد"
+];
 
 function StepIndicator({ step }: { step: number }) {
   return (
@@ -95,16 +124,12 @@ function Step1({ data, setData }: { data: any; setData: any }) {
             <div key={key} className="flex flex-col gap-1.5">
               <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>{label}</label>
               {type === "select" ? (
-                <select
+                <CustomSelect
                   value={data[key] || ""}
-                  onChange={(e) => setData({ ...data, [key]: e.target.value })}
-                  dir="rtl"
-                  className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none"
-                  style={{ fontFamily: F }}
-                >
-                  <option value="">اختر النوع</option>
-                  {options.map((o: string) => <option key={o} value={o}>{o}</option>)}
-                </select>
+                  onChange={(val: string) => setData({ ...data, [key]: val })}
+                  options={options}
+                  placeholder="اختر النوع"
+                />
               ) : (
                 <input
                   type={inputType || "text"}
@@ -358,16 +383,12 @@ function Step3({ data, setData }: { data: any; setData: any }) {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>المدينة</label>
-                <select
+                <CustomSelect
                   value={data.city || ""}
-                  onChange={(e) => setData({ ...data, city: e.target.value })}
-                  dir="rtl"
-                  className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none"
-                  style={{ fontFamily: F }}
-                >
-                  <option value="">اختر المدينة</option>
-                  {EGYPT_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
+                  onChange={(val) => setData({ ...data, city: val })}
+                  options={EGYPT_CITIES}
+                  placeholder="اختر المدينة"
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>الحي</label>

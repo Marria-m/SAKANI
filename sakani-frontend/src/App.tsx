@@ -16,6 +16,9 @@ import WaitingRequests from './app/pages/WaitingRequests';
 import AddProperty from './app/pages/AddProperty';
 import EditProperty from './app/pages/EditProperty';
 import ExploreProperties from './app/pages/ExploreProperties';
+import TenantHome from './app/pages/TenantHome';
+import MyBookings from './app/pages/MyBookings';
+import WishList from './app/pages/WishList';
 import HowItWorks from './app/pages/HowItWorks';
 import ContactUs from './app/pages/ContactUs';
 import Help from './app/pages/Help';
@@ -43,6 +46,9 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/chats" element={<ChatPage />} />
             <Route path="/waiting" element={<WaitingRequests />} />
+            <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/tenant-home" element={<TenantHome />} />
+            <Route path="/wishlist" element={<WishList />} />
             <Route path="/add-property" element={<AddProperty />} />
             <Route path="/edit-property/:id" element={<EditProperty />} />
             <Route path="/help" element={<Help />} />

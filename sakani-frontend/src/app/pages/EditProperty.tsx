@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ChevronRight, Home, Zap, MapPin, Image,
-  Plus, X, Check, Upload, Trash2
+  Plus, X, Trash2
 } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout";
 import api from "../../api/axiosConfig";
 import InteractiveMap from "../components/InteractiveMap";
+import CustomSelect from "../components/CustomSelect";
 
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";
@@ -18,7 +19,36 @@ const getImageUrl = (url?: string) => {
   return `${base}/${url.replace(/^\/+/, "")}`;
 };
 
-const EGYPT_CITIES = ["القاهرة", "الجيزة", "الإسكندرية", "المنصورة", "طنطا", "أسيوط", "الزقازيق", "الفيوم"];
+const EGYPT_CITIES = [
+  "القاهرة",
+  "الجيزة",
+  "الإسكندرية",
+  "المنصورة",
+  "طنطا",
+  "أسيوط",
+  "الزقازيق",
+  "الفيوم",
+  "المنيا",
+  "سوهاج",
+  "قنا",
+  "الأقصر",
+  "أسوان",
+  "بني سويف",
+  "شبين الكوم",
+  "بنها",
+  "دمنهور",
+  "كفر الشيخ",
+  "دمياط",
+  "بورسعيد",
+  "الإسماعيلية",
+  "السويس",
+  "العريش",
+  "الطور",
+  "الغردقة",
+  "مرسى مطروح",
+  "الخارجة",
+  "الوادى الجديد"
+];
 
 export default function EditProperty() {
   const navigate = useNavigate();
@@ -281,15 +311,12 @@ export default function EditProperty() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>المدينة</label>
-                  <select
+                  <CustomSelect
                     value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none cursor-pointer"
-                    style={{ fontFamily: F }}
-                  >
-                    <option value="">اختر المدينة</option>
-                    {EGYPT_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, city: val })}
+                    options={EGYPT_CITIES}
+                    placeholder="اختر المدينة"
+                  />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>السعر الشهري (جنيه مصري)</label>
@@ -390,15 +417,12 @@ export default function EditProperty() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>المدينة</label>
-                      <select
+                      <CustomSelect
                         value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none cursor-pointer"
-                        style={{ fontFamily: F }}
-                      >
-                        <option value="">اختر المدينة</option>
-                        {EGYPT_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                        onChange={(val) => setFormData({ ...formData, city: val })}
+                        options={EGYPT_CITIES}
+                        placeholder="اختر المدينة"
+                      />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>العنوان والحي</label>

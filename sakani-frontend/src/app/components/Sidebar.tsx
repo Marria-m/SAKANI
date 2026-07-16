@@ -10,17 +10,26 @@ import {
   HelpCircle,
   LogOut,
   PlusCircle,
+  Heart,
 } from "lucide-react";
 
 const F = "'Readex Pro', sans-serif";
 
-const NAV = [
+const OWNER_NAV = [
   { path: "/dashboard",   label: "الرئيسية",         icon: LayoutDashboard },
   { path: "/properties",  label: "عقاراتي",           icon: Building2 },
   { path: "/waiting",     label: "طلبات الانتظار",    icon: Clock },
   { path: "/chats",       label: "المحادثات",          icon: MessageCircle },
   { path: "/profile",     label: "ملفي الشخصي",       icon: User },
   { path: "/reviews",     label: "آراء المستأجرين",   icon: Star },
+];
+
+const TENANT_NAV = [
+  { path: "/tenant-home", label: "الرئيسية",          icon: LayoutDashboard },
+  { path: "/wishlist",    label: "المفضلة",           icon: Heart },
+  { path: "/my-bookings", label: "حجوزاتي وطلباتي",   icon: Clock },
+  { path: "/chats",       label: "المحادثات",          icon: MessageCircle },
+  { path: "/profile",     label: "ملفي الشخصي",       icon: User },
 ];
 
 interface SidebarProps {
@@ -31,7 +40,20 @@ interface SidebarProps {
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  const getRole = (): string => {
+    if (!user?.token) return '';
+    try {
+      const payload = JSON.parse(atob(user.token.split('.')[1]));
+      return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const role = getRole();
+  const NAV = role === "Tenant" ? TENANT_NAV : OWNER_NAV;
 
   const handleLogout = () => {
     logout();
@@ -78,16 +100,18 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
             <button
               key={path}
               onClick={() => navigate(path)}
-              className="flex items-center gap-3 px-3 py-3 rounded-xl text-right w-full transition-all cursor-pointer"
+              className="flex items-center gap-3 pr-4 pl-3 py-3 rounded-xl text-right w-full transition-all duration-200 cursor-pointer border-none outline-none"
               style={{
-                background: active ? "rgba(242,153,74,0.15)" : "transparent",
+                background: active ? "rgba(242,153,74,0.12)" : "transparent",
                 color: active ? "#f2994a" : "rgba(203,213,225,0.7)",
+                borderRight: active ? "4px solid #f2994a" : "4px solid transparent",
+                paddingRight: active ? "16px" : "12px",
                 fontFamily: F,
                 fontSize: 14,
                 fontWeight: active ? 600 : 400,
               }}
             >
-              <Icon size={18} />
+              <Icon size={18} className="transition-transform duration-200" style={{ transform: active ? "scale(1.05)" : "scale(1)" }} />
               <span>{label}</span>
             </button>
           );
@@ -95,16 +119,18 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
       </nav>
 
       {/* Add property */}
-      <div className="px-3 pb-2">
-        <button
-          onClick={() => navigate("/add-property")}
-          className="flex items-center gap-2 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90 cursor-pointer"
-          style={{ background: "#f2994a", color: "#001d28", fontFamily: F }}
-        >
-          <PlusCircle size={16} />
-          إضافة سكن جديد
-        </button>
-      </div>
+      {role !== "Tenant" && (
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => navigate("/add-property")}
+            className="flex items-center gap-2 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90 cursor-pointer border-none"
+            style={{ background: "#f2994a", color: "#001d28", fontFamily: F }}
+          >
+            <PlusCircle size={16} />
+            إضافة سكن جديد
+          </button>
+        </div>
+      )}
 
       {/* Bottom links */}
       <div className="px-3 pb-6 flex flex-col gap-1 border-t border-white/10 pt-3 mt-1">

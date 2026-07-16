@@ -29,19 +29,36 @@ export default function AccountChoice() {
       // Temporary token storage to authenticate subsequent profile fetch
       localStorage.setItem("accessToken", userData.token);
       
-      try {
-        const profileRes = await api.get("/owner/profile", {
-          headers: { Authorization: `Bearer ${userData.token}` }
-        });
-        if (profileRes.data && profileRes.data.profileImageUrl) {
-          userData.profileImageUrl = profileRes.data.profileImageUrl;
-        }
-      } catch (profileErr) {
-        console.error("Failed to pre-fetch owner profile image", profileErr);
-      }
+      const payload = JSON.parse(atob(userData.token.split('.')[1]));
+      const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
 
-      login(userData);
-      navigate("/dashboard");
+      if (role === "Tenant") {
+        try {
+          const profileRes = await api.get("/Tenant/profile", {
+            headers: { Authorization: `Bearer ${userData.token}` }
+          });
+          if (profileRes.data && profileRes.data.profileImageUrl) {
+            userData.profileImageUrl = profileRes.data.profileImageUrl;
+          }
+        } catch (profileErr) {
+          console.error("Failed to pre-fetch tenant profile image", profileErr);
+        }
+        login(userData);
+        navigate("/tenant-home");
+      } else {
+        try {
+          const profileRes = await api.get("/owner/profile", {
+            headers: { Authorization: `Bearer ${userData.token}` }
+          });
+          if (profileRes.data && profileRes.data.profileImageUrl) {
+            userData.profileImageUrl = profileRes.data.profileImageUrl;
+          }
+        } catch (profileErr) {
+          console.error("Failed to pre-fetch owner profile image", profileErr);
+        }
+        login(userData);
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       setError(
         err.response?.data?.message ||

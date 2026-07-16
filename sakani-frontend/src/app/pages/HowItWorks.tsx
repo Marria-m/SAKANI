@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap, Building2, UserCheck, ShieldCheck } from "lucide-react";
+import { ArrowLeft, GraduationCap, Building2 } from "lucide-react";
 
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";

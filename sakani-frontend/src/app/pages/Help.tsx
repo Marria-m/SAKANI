@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { HelpCircle, ChevronDown, MessageSquare, Phone, Mail, BookOpen, Send, CheckCircle } from "lucide-react";
+import { ChevronDown, MessageSquare, Phone, Mail, BookOpen, Send, CheckCircle } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout";
+import { useAuth } from "../../context/AuthContext";
 
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";
 
-const FAQS = [
+const OWNER_FAQS = [
   {
     q: "كيف يمكنني إضافة عقار جديد؟",
     a: "من القائمة الجانبية، انقر على زر 'إضافة سكن جديد'. املأ البيانات الأساسية، حدد المزايا المتوفرة، حدد موقع العقار الجغرافي، ثم قم برفع صور العقار وانقر على 'نشر'."
@@ -28,11 +29,48 @@ const FAQS = [
   }
 ];
 
+const TENANT_FAQS = [
+  {
+    q: "كيف يمكنني البحث وتصفية السكنات المتاحة؟",
+    a: "من شاشة الرئيسية، يمكنك استخدام شريط التصفية السريع لتحديد المدينة، نطاق السعر، عدد الغرف وسياسة الجنس الملائمة للطلاب لتظهر لك العقارات المطابقة فوراً."
+  },
+  {
+    q: "كيف يمكنني حجز موعد لمعاينة السكن؟",
+    a: "عند الدخول لصفحة تفاصيل أي سكن، ستجد في اللوحة الجانبية نموذج 'طلب تحديد موعد معاينة'. حدد تاريخ الزيارة المقترح واكتب رسالتك للمالك ثم اضغط إرسال. يمكنك متابعة حالة الطلب في صفحة 'حجوزاتي وطلباتي'."
+  },
+  {
+    q: "كيف أقوم بطلب تأجير رسمي (عقد إيجار)؟",
+    a: "بمجرد قبول المالك لطلب المعاينة الخاص بك، سيظهر لك في صفحة تفاصيل العقار نموذج 'طلب تأجير السكن'. قم بتحديد موعد بدء العقد ومدة الإيجار المطلوبة ثم أرسل الطلب وبانتظار موافقة المالك النهائية."
+  },
+  {
+    q: "كيف يمكنني الاحتفاظ بالعقارات المفضلة؟",
+    a: "يمكنك الضغط على رمز القلب الأحمر الموجود على كرت العقار في شاشة الاستكشاف أو الضغط على زر 'إضافة للمفضلة' في صفحة تفاصيل السكن، لتجدها محفوظة دائماً للرجوع إليها لاحقاً في صفحة 'المفضلة'."
+  },
+  {
+    q: "هل يمكنني إلغاء موعد معاينة أو حجز؟",
+    a: "نعم، يمكنك إلغاء أي موعد معاينة قيد الانتظار أو حجز قادم بالذهاب إلى صفحة 'حجوزاتي وطلباتي' والضغط على زر 'إلغاء الطلب' بجانب كارت الحجز المعني."
+  }
+];
+
 export default function Help() {
+  const { user } = useAuth();
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+
+  const getRole = (): string => {
+    if (!user?.token) return '';
+    try {
+      const payload = JSON.parse(atob(user.token.split('.')[1]));
+      return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const role = getRole();
+  const FAQS = role === "Tenant" ? TENANT_FAQS : OWNER_FAQS;
 
   const handleTicketSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,10 +126,21 @@ export default function Help() {
 
             {/* Quick tutorials panel */}
             <div className="bg-[#001d28] rounded-3xl p-6 text-white text-right flex flex-col gap-3" style={{ boxShadow: "0 4px 12px rgba(0,29,40,0.1)" }}>
-              <h3 className="font-bold text-base" style={{ fontFamily: C }}>إرشادات الأمان والموثوقية 🛡️</h3>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                تأكد دائماً من صحة البيانات المرفوعة لعقاراتك لتجنب حظر الحساب. نوصي بتوثيق الهوية الوطنية لزيادة ثقة الطلاب في عروض السكن الخاصة بك ورفع معدل حجز الوحدات بنسبة تصل إلى 80%.
-              </p>
+              {role === "Tenant" ? (
+                <>
+                  <h3 className="font-bold text-base" style={{ fontFamily: C }}>إرشادات الأمان والموثوقية للطلاب 🛡️</h3>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    تأكد دائماً من معاينة السكن والاتفاق مع المالك قبل سداد مبالغ حجز الوحدات. نوصي بالتواصل مع الملاك من خلال القنوات الرسمية بالمنصة لضمان حقوقك وتأكيد حجزك بشكل موثق.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-bold text-base" style={{ fontFamily: C }}>إرشادات الأمان والموثوقية للملاك 🛡️</h3>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    تأكد دائماً من صحة البيانات المرفوعة لعقاراتك لتجنب حظر الحساب. نوصي بتوثيق الهوية الوطنية لزيادة ثقة الطلاب في عروض السكن الخاصة بك ورفع معدل حجز الوحدات بنسبة تصل إلى 80%.
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
