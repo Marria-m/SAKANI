@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Sakani.DAL.Data.Context;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
+using Sakani.Domain.Enums;
 
 namespace Sakani.DAL.Repositories
 {
@@ -41,8 +42,8 @@ namespace Sakani.DAL.Repositories
             int? minRooms,
             int? maxCapacity,
             bool? isBarginAllowed,
-            int? genderPolicies,
-            int? status,
+            GenderPolices? genderPolicies,
+            AppartmentStatus? status,
             List<string>? amenities,
             int pageIndex,
             int pageSize)
@@ -90,12 +91,12 @@ namespace Sakani.DAL.Repositories
 
             if (genderPolicies.HasValue)
             {
-                query = query.Where(a => (int)a.GenderPolices == genderPolicies.Value);
+                query = query.Where(a => a.GenderPolices == genderPolicies.Value);
             }
 
             if (status.HasValue)
             {
-                query = query.Where(a => (int)a.Status == status.Value);
+                query = query.Where(a => a.Status == status.Value);
             }
 
             if (amenities != null && amenities.Count > 0)

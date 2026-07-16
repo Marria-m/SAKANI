@@ -1,5 +1,7 @@
 using Sakani.Domain.Entities;
-
+using Sakani.Domain.Enums;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Sakani.Domain.Interfaces
 {
@@ -16,9 +18,9 @@ namespace Sakani.Domain.Interfaces
             int? minRooms,
             int? maxCapacity,
             bool? isBarginAllowed,
-            int? genderPolicies,
-            int? status,
-            System.Collections.Generic.List<string>? amenities,
+            GenderPolices? genderPolicies,
+            AppartmentStatus? status,
+            List<string>? amenities,
             int pageIndex,
             int pageSize);
     }

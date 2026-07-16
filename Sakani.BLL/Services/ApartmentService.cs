@@ -194,8 +194,8 @@ namespace Sakani.BLL.Services
                 filterDto.MinRooms ?? filterDto.NoOfRooms,
                 filterDto.MaxCapacity,
                 filterDto.IsBarginAllowed,
-                filterDto.GenderPolices.HasValue ? (int?)filterDto.GenderPolices.Value : null,
-                filterDto.Status.HasValue ? (int?)filterDto.Status.Value : null,
+                filterDto.GenderPolices,
+                filterDto.Status,
                 filterDto.Amenities,
                 filterDto.PageIndex > 0 ? filterDto.PageIndex : filterDto.PageNumber,
                 filterDto.PageSize > 0 ? filterDto.PageSize : 10
