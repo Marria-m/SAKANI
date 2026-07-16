@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout";
 import api from "../../api/axiosConfig";
+import InteractiveMap from "../components/InteractiveMap";
 
 const F = "'Readex Pro', sans-serif";
 const C = "'Cairo', sans-serif";
@@ -38,6 +39,8 @@ export default function EditProperty() {
     city: "",
     location: "",
     status: 2, // Empty
+    latitude: null,
+    longitude: null,
   });
 
   const [existingMedia, setExistingMedia] = useState<any[]>([]);
@@ -59,6 +62,9 @@ export default function EditProperty() {
           city: property.city || "",
           location: property.location || "",
           status: property.status !== undefined ? property.status : 2,
+          latitude: property.latitude || null,
+          longitude: property.longitude || null,
+          locationMode: property.latitude ? "map" : "manual",
         });
 
         setExistingMedia(property.media || []);
@@ -74,6 +80,65 @@ export default function EditProperty() {
       loadProperty();
     }
   }, [id]);
+
+  const [loadingGeocode, setLoadingGeocode] = useState(false);
+  const locationMode = formData.locationMode || (formData.latitude ? "map" : "manual");
+
+  const handleMapChange = async (lat: number, lng: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+
+    setLoadingGeocode(true);
+    try {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (apiKey && (window as any).google && (window as any).google.maps) {
+        const geocoder = new (window as any).google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
+          if (status === "OK" && results[0]) {
+            const formatted = results[0].formatted_address;
+            let cityVal = "";
+            for (const component of results[0].address_components) {
+              if (component.types.includes("administrative_area_level_1") || component.types.includes("locality")) {
+                cityVal = component.long_name;
+                break;
+              }
+            }
+            const matchedCity = EGYPT_CITIES.find(c => formatted.includes(c) || cityVal.includes(c)) || EGYPT_CITIES[0];
+            setFormData((prev: any) => ({
+              ...prev,
+              latitude: lat,
+              longitude: lng,
+              location: formatted,
+              city: matchedCity,
+            }));
+          }
+        });
+      } else {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
+        const result = await res.json();
+        if (result && result.display_name) {
+          const address = result.display_name;
+          const addressObj = result.address || {};
+          const rawCity = addressObj.city || addressObj.town || addressObj.state || addressObj.governorate || "";
+          const matchedCity = EGYPT_CITIES.find(c => address.includes(c) || rawCity.includes(c)) || EGYPT_CITIES[0];
+          setFormData((prev: any) => ({
+            ...prev,
+            latitude: lat,
+            longitude: lng,
+            location: address,
+            city: matchedCity,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingGeocode(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -118,6 +183,8 @@ export default function EditProperty() {
         areaSqm: Number(formData.areaSqm) || 50,
         securityDeposit: Number(formData.price) * 0.5,
         status: Number(formData.status),
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       await api.put(`/apartments/${id}`, payload);
@@ -283,21 +350,94 @@ export default function EditProperty() {
 
             {/* Section 2: Location Details */}
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                <MapPin size={18} className="text-[#f2994a]" />
-                <h3 className="text-[#001d28] font-black text-lg" style={{ fontFamily: C }}>الموقع الجغرافي</h3>
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                {/* Tab switcher */}
+                <div className="flex bg-[#f3f4f5] p-1.5 rounded-xl gap-1" dir="rtl">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, locationMode: "map" })}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all duration-200 ${
+                      locationMode === "map"
+                        ? "bg-[#001d28] text-white shadow-sm"
+                        : "bg-transparent text-gray-500 hover:text-[#001d28]"
+                    }`}
+                    style={{ fontFamily: F }}
+                  >
+                    📍 تحديد عبر الخريطة (GPS)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, locationMode: "manual", latitude: null, longitude: null })}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all duration-200 ${
+                      locationMode === "manual"
+                        ? "bg-[#001d28] text-white shadow-sm"
+                        : "bg-transparent text-gray-500 hover:text-[#001d28]"
+                    }`}
+                    style={{ fontFamily: F }}
+                  >
+                    ✍️ إدخال يدوي للعنوان
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} className="text-[#f2994a]" />
+                  <h3 className="text-[#001d28] font-black text-lg" style={{ fontFamily: C }}>الموقع الجغرافي</h3>
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>العنوان التفصيلي والحي</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none"
-                  style={{ fontFamily: F }}
-                />
-              </div>
+
+              {locationMode === "manual" ? (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>المدينة</label>
+                      <select
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none cursor-pointer"
+                        style={{ fontFamily: F }}
+                      >
+                        <option value="">اختر المدينة</option>
+                        {EGYPT_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[#001d28] text-sm font-semibold text-right" style={{ fontFamily: F }}>العنوان والحي</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        className="bg-[#f3f4f5] rounded-xl px-4 py-3 text-sm text-[#001d28] outline-none text-right border-none"
+                        style={{ fontFamily: F }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="h-56 rounded-2xl overflow-hidden border border-gray-100 relative" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
+                    <InteractiveMap
+                      lat={formData.latitude}
+                      lng={formData.longitude}
+                      onChange={handleMapChange}
+                    />
+                  </div>
+                  
+                  {loadingGeocode && (
+                    <p className="text-xs text-orange-500 text-right font-medium animate-pulse" style={{ fontFamily: F }}>
+                      ⏳ جاري تحديد العنوان من الخريطة...
+                    </p>
+                  )}
+
+                  {formData.location && !loadingGeocode && (
+                    <div className="bg-[#f8f9fa] rounded-2xl p-4 text-right flex flex-col gap-2">
+                      <span className="text-[10px] text-gray-400 font-semibold" style={{ fontFamily: F }}>العنوان المكتشف تلقائياً</span>
+                      <span className="text-xs text-[#001d28] font-bold leading-relaxed">{formData.location}</span>
+                      <span className="text-[10px] text-gray-400 font-medium">المدينة: {formData.city}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Section 3: Status / Occupancy */}

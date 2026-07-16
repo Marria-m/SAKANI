@@ -102,15 +102,6 @@ namespace SAKANI.Controllers
 
                 // Upload file
                 var relativeUrl = await _fileService.UploadFileAsync(file, "profiles");
-                var physicalPath = _fileService.GetPhysicalPath(relativeUrl);
-
-                // Run Image Quality Check via AI
-                var qualityResult = await _aiService.CheckImageQualityAsync(physicalPath);
-                if (qualityResult != null && !qualityResult.IsAcceptable)
-                {
-                    _fileService.DeleteFile(relativeUrl);
-                    return BadRequest(new { message = "Image rejected by AI quality check: " + string.Join(", ", qualityResult.Issues) });
-                }
 
                 // Update database
                 owner.ProfileImageUrl = relativeUrl;

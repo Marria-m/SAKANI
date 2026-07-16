@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Star, Eye, Users, Bed, Bath, Maximize2, ChevronRight, Phone } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout";
 import api from "../../api/axiosConfig";
+import InteractiveMap from "../components/InteractiveMap";
 import img1 from "@/imports/تفاصيلالعقارمنمنظورالمالك/71b2557214c823053e11c09dc640ae6aa01b532c.png";
 
 const F = "'Readex Pro', sans-serif";
@@ -201,6 +202,20 @@ export default function PropertyDetail() {
                     {property.description}
                   </p>
                 </div>
+
+                {/* Location Map */}
+                {property.latitude && property.longitude && (
+                  <div className="flex flex-col gap-2 mt-4 text-right">
+                    <h4 className="text-[#001d28] font-bold text-sm" style={{ fontFamily: C }}>الموقع على الخريطة</h4>
+                    <div className="h-56 rounded-2xl overflow-hidden" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
+                      <InteractiveMap
+                        lat={property.latitude}
+                        lng={property.longitude}
+                        readonly={true}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

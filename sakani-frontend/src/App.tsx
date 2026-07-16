@@ -18,6 +18,7 @@ import EditProperty from './app/pages/EditProperty';
 import ExploreProperties from './app/pages/ExploreProperties';
 import HowItWorks from './app/pages/HowItWorks';
 import ContactUs from './app/pages/ContactUs';
+import Help from './app/pages/Help';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/waiting" element={<WaitingRequests />} />
             <Route path="/add-property" element={<AddProperty />} />
             <Route path="/edit-property/:id" element={<EditProperty />} />
+            <Route path="/help" element={<Help />} />
           </Route>
 
           {/* Default redirect */}

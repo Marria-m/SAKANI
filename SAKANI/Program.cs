@@ -170,7 +170,7 @@ namespace SAKANI
             app.UseAuthorization();
             app.MapControllers();
 
-#if DEBUG
+            #if DEBUG
             // Start frontend process and Python AI Service automatically in development environment
             if (app.Environment.IsDevelopment())
             {
@@ -224,7 +224,7 @@ namespace SAKANI
                     });
                 }
             }
-#endif
+            #endif
 
             app.Run();
         }
