@@ -87,7 +87,7 @@ namespace SAKANI.Controllers
 
             return Ok(wishList);
         }
-
+        [Authorize(Roles="Tenant")]
         [HttpPost("wishlist/add/{apartmentId:int}")]
         public async Task<IActionResult> AddToWishList(int apartmentId)
         {

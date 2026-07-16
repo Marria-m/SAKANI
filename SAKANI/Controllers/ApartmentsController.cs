@@ -65,7 +65,7 @@ namespace SAKANI.Controllers
         // Authenticated Owner Endpoints
         // ==========================================
 
-        [Authorize]
+        [Authorize(Roles="Owner")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OwnerApartmentRequestDto dto)
         {
@@ -87,7 +87,7 @@ namespace SAKANI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdApartment.Id }, createdApartment);
         }
 
-        [Authorize]
+        [Authorize(Roles="Owner")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] OwnerApartmentRequestDto dto)
         {
@@ -121,7 +121,7 @@ namespace SAKANI.Controllers
             return Ok(updatedApartment);
         }
 
-        [Authorize]
+        [Authorize(Roles="Owner")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

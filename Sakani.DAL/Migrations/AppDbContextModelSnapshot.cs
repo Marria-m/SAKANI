@@ -767,7 +767,7 @@ namespace Sakani.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Sakani.Domain.Entities.Report", b =>

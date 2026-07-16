@@ -48,5 +48,12 @@ namespace Sakani.DAL.Repositories
                         .ThenInclude(ap => ap.Owner)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
+
+        public async Task<IReadOnlyList<Booking>> GetByApartmentIdAsync(int apartmentId)
+        {
+            return await _context.Bookings
+                .Where(b => b.Appointment.ApartmentId == apartmentId)
+                .ToListAsync();
+        }
     }
 }

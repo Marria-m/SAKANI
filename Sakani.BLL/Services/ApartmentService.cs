@@ -3,7 +3,9 @@ using Sakani.BLL.Core.DTOs.ApartmentDTOs;
 using Sakani.BLL.Core.Interfaces;
 using Sakani.Domain.Entities;
 using Sakani.Domain.Interfaces;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sakani.BLL.Services
@@ -11,12 +13,30 @@ namespace Sakani.BLL.Services
     public class ApartmentService : IApartmentService
     {
         private readonly IApartmentRepository _apartmentRepository;
+        private readonly IRepository<Amenities> _amenitiesRepository;
+        private readonly IRepository<ApartmentMedia> _mediaRepository;
+        private readonly IRepository<WishListApartment> _wishListApartmentRepository;
+        private readonly IAppointmentRepository _appointmentRepository;
+        private readonly ITenantBookingRepository _bookingRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ApartmentService(IApartmentRepository apartmentRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public ApartmentService(
+            IApartmentRepository apartmentRepository,
+            IRepository<Amenities> amenitiesRepository,
+            IRepository<ApartmentMedia> mediaRepository,
+            IRepository<WishListApartment> wishListApartmentRepository,
+            IAppointmentRepository appointmentRepository,
+            ITenantBookingRepository bookingRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
             _apartmentRepository = apartmentRepository;
+            _amenitiesRepository = amenitiesRepository;
+            _mediaRepository = mediaRepository;
+            _wishListApartmentRepository = wishListApartmentRepository;
+            _appointmentRepository = appointmentRepository;
+            _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -74,13 +94,62 @@ namespace Sakani.BLL.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var apartment = await _apartmentRepository.GetByIdAsync(id);
+            var apartment = await _apartmentRepository.GetWithDetailsAsync(id);
             if (apartment == null)
             {
                 return false;
             }
 
+            // 1. Manually delete bookings referencing this apartment's appointments
+            var bookings = await _bookingRepository.GetByApartmentIdAsync(id);
+            if (bookings != null && bookings.Count > 0)
+            {
+                foreach (var booking in bookings)
+                {
+                    _bookingRepository.Delete(booking);
+                }
+            }
+
+            // 2. Manually delete appointments referencing this apartment
+            var appointments = await _appointmentRepository.GetByApartmentIdAsync(id);
+            if (appointments != null && appointments.Count > 0)
+            {
+                foreach (var appointmentItem in appointments)
+                {
+                    _appointmentRepository.Delete(appointmentItem);
+                }
+            }
+
+            // 3. Manually delete related Amenities
+            if (apartment.Amenities != null && apartment.Amenities.Count > 0)
+            {
+                foreach (var amenity in apartment.Amenities.ToList())
+                {
+                    _amenitiesRepository.Delete(amenity);
+                }
+            }
+
+            // 4. Manually delete related Media
+            if (apartment.Media != null && apartment.Media.Count > 0)
+            {
+                foreach (var mediaItem in apartment.Media.ToList())
+                {
+                    _mediaRepository.Delete(mediaItem);
+                }
+            }
+
+            // 5. Manually delete related WishListApartments
+            if (apartment.WishListApartments != null && apartment.WishListApartments.Count > 0)
+            {
+                foreach (var wla in apartment.WishListApartments.ToList())
+                {
+                    _wishListApartmentRepository.Delete(wla);
+                }
+            }
+
+            // 6. Finally delete the apartment itself
             _apartmentRepository.Delete(apartment);
+
             await _unitOfWork.SaveChangesAsync();
             return true;
         }

@@ -22,6 +22,7 @@ namespace Sakani.DAL.Repositories
                 .Include(a => a.Owner)
                 .Include(a => a.Media)
                 .Include(a => a.Amenities)
+                .Include(a => a.WishListApartments)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(a => a.Id == id);
         }

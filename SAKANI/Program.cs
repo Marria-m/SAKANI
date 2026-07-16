@@ -36,7 +36,8 @@ namespace SAKANI
             // BLL: AutoMapper + FluentValidation + JwtTokenHelper + AuthService
             builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
-            // JWT Authentication — override Identity's default cookie scheme with Bearer
+            // JWT and External Google Authentication
+            var google = builder.Configuration.GetSection("Authentication:Google");
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,20 +56,14 @@ namespace SAKANI
                     IssuerSigningKey         = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
                 };
-            });
-
-            // add Google Authentication
-            var google = builder.Configuration.GetSection("Authentication:Google");
-            builder.Services.AddAuthentication(options => {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            }).AddGoogle(options =>
+            })
+            .AddGoogle(options =>
             {
                 options.ClientId = google["ClientId"]!;
                 options.ClientSecret = google["ClientSecret"]!;
                 options.CallbackPath = "/signin-google";
-            }
-            );
+                options.SignInScheme = IdentityConstants.ExternalScheme;
+            });
 
 
             // add rate limiting using token bucket algorithm
